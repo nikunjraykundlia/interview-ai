@@ -1,0 +1,208 @@
+@import "tailwindcss";
+
+* {
+  font-family: var(--font-mazzard);
+}
+
+:root {
+  --main-bg: #E5E9EB;
+  --background: #050505;
+  --nav-text: #848484;
+  --theme-color: #B77895;
+  --theme-hover: #ffacf3;
+  --primary-bg: #161831;
+  --secondry-text: #2C77EB;
+  --gradient-bg: linear-gradient(90deg,_rgba(44,119,235,1)_0%,_rgba(74,183,240,1)_100%);
+  --input-bg: #23191E;
+}
+
+@theme {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  background-color: var(--input-bg) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
+
+@layer utilities {
+  .task-status {
+    @apply px-2 py-1 text-xs rounded-full;
+  }
+  .input-div {
+    @apply flex items-center max-sm:w-full justify-center bg-[var(--input-bg)] sm:w-[50vw] h-[64px] rounded-[8px] px-6 gap-5;
+  }
+  .input-field {
+    @apply w-full h-full text-base placeholder-zinc-400 font-semibold outline-none bg-transparent;
+  }
+  .btn-primary {
+    @apply flex bg-[var(--input-bg)] w-full h-[64px] rounded-[8px] items-center justify-center gap-3 font-semibold border-2 border-gray-500 cursor-pointer hover:bg-transparent transition-all;
+  }
+}
+
+/* .logo {
+  font-family: var(--font-radis);
+} */
+
+.nav-hover::after {
+  content: "";
+  position: absolute;
+  background-color: #848484;
+  height: 1px;
+  width: 0;
+  left: 0;
+  bottom: -1px;
+  transition: 0.3s;
+}
+
+.nav-hover:hover::after {
+  width: 100%;
+}
+
+.btn {
+  background: linear-gradient(to top, #ffacf3 50%, #B77895 50%);
+  background-size: 100% 200%;
+  background-position: top;
+}
+
+.btn:hover {
+  background-position: bottom;
+  color: #000;
+}
+
+::selection {
+  background: #464646;
+}
+
+.bg {
+  background: linear-gradient(90deg, rgba(23,20,21,1) 0%, rgba(35,25,30,1) 100%);
+}
+
+.arrow-div {
+  animation: moveUpDown 3s ease-in-out infinite;
+}
+
+@keyframes moveUpDown {
+  0%, 100% {
+    top: 55vh;
+  }
+  50% {
+    top: 52vh;
+  }
+}
+
+.card {
+  box-shadow: 0 0 100px 5px #fff;
+}
+
+
+/* loader css */
+.three-body {
+  --uib-size: 35px;
+  --uib-speed: 0.8s;
+  --uib-color: #5D3FD3;
+  position: relative;
+  display: inline-block;
+  height: var(--uib-size);
+  width: var(--uib-size);
+  animation: spin78236 calc(var(--uib-speed) * 2.5) infinite linear;
+ }
+ 
+ .three-body__dot {
+  position: absolute;
+  height: 100%;
+  width: 30%;
+ }
+ 
+ .three-body__dot:after {
+  content: '';
+  position: absolute;
+  height: 0%;
+  width: 100%;
+  padding-bottom: 100%;
+  background-color: var(--uib-color);
+  border-radius: 50%;
+ }
+ 
+ .three-body__dot:nth-child(1) {
+  bottom: 5%;
+  left: 0;
+  transform: rotate(60deg);
+  transform-origin: 50% 85%;
+ }
+ 
+ .three-body__dot:nth-child(1)::after {
+  bottom: 0;
+  left: 0;
+  animation: wobble1 var(--uib-speed) infinite ease-in-out;
+  animation-delay: calc(var(--uib-speed) * -0.3);
+ }
+ 
+ .three-body__dot:nth-child(2) {
+  bottom: 5%;
+  right: 0;
+  transform: rotate(-60deg);
+  transform-origin: 50% 85%;
+ }
+ 
+ .three-body__dot:nth-child(2)::after {
+  bottom: 0;
+  left: 0;
+  animation: wobble1 var(--uib-speed) infinite
+     calc(var(--uib-speed) * -0.15) ease-in-out;
+ }
+ 
+ .three-body__dot:nth-child(3) {
+  bottom: -5%;
+  left: 0;
+  transform: translateX(116.666%);
+ }
+ 
+ .three-body__dot:nth-child(3)::after {
+  top: 0;
+  left: 0;
+  animation: wobble2 var(--uib-speed) infinite ease-in-out;
+ }
+ 
+ @keyframes spin78236 {
+  0% {
+   transform: rotate(0deg);
+  }
+ 
+  100% {
+   transform: rotate(360deg);
+  }
+ }
+ 
+ @keyframes wobble1 {
+  0%,
+   100% {
+   transform: translateY(0%) scale(1);
+   opacity: 1;
+  }
+ 
+  50% {
+   transform: translateY(-66%) scale(0.65);
+   opacity: 0.8;
+  }
+ }
+ 
+ @keyframes wobble2 {
+  0%,
+   100% {
+   transform: translateY(0%) scale(1);
+   opacity: 1;
+  }
+ 
+  50% {
+   transform: translateY(66%) scale(0.65);
+   opacity: 0.8;
+  }
+ }
