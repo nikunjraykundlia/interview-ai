@@ -89,6 +89,60 @@ export async function POST(
   }
 }
 
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    await connectDB();
+
+    const id = params.id;
+
+    // get token from authorization header
+    const authHeader = req.headers.get("Authorization");
+    const token = authHeader?.startsWith("Bearer ")
+      ? authHeader.substring(7)
+      : null;
+
+    if (!token) {
+      return NextResponse.json(
+        { message: "Unauthorized, token not found" },
+        { status: 401 }
+      );
+    }
+
+    // get user id from token
+    const userId = getUserIdFromToken(token);
+
+    // find interview
+    const interview = await Interview.findById(id);
+    if (!interview) {
+      return NextResponse.json(
+        { message: "Interview not found" },
+        { status: 404 }
+      );
+    }
+
+    // verify ownership
+    if (interview.user.toString() !== userId) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    await Interview.deleteOne({ _id: id });
+
+    return NextResponse.json(
+      { message: "Interview deleted successfully", id },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error deleting interview", error);
+    return NextResponse.json(
+      { message: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -97,7 +151,7 @@ export async function GET(
     await connectDB();
 
     //extract id
-    const id = await params.id;
+    const id = params.id;
 
     // get token from authorization header
     const authHeader = req.headers.get("Authorization");

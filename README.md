@@ -6,7 +6,7 @@ InterviewAI is a smart, full-stack mock interview platform designed to simulate 
 ## 🚀 Features
 
 - 🧠 **AI-Generated Questions**  
-  Get tailored interview questions based on job role, tech stack, or your uploaded resume (PDF).
+  Get tailored interview questions based on your job role and the Resume Details you enter.
 
 - 🎤 **Voice-Based Interviewing**  
   Use your mic to respond — the AI converts speech to text and evaluates your answers.
@@ -20,8 +20,8 @@ InterviewAI is a smart, full-stack mock interview platform designed to simulate 
 - 💡 **Personalized Feedback**  
   Get improvement tips for each answer and your overall performance.
 
-- 📁 **Resume Parsing**  
-  Upload a resume to get customized interview questions based on your skills and experience.
+- 📝 **Single-field Resume Details**  
+  Provide your skills, projects, and experience in one field.
 
 - 📈 **Test History & Dashboard**  
   Track your past interviews, scores, and feedback — all in one place.

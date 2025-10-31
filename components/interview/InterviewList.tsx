@@ -92,6 +92,28 @@ export default function InterviewList() {
     router.push(`/interview/${id}/analysis`);
   };
 
+  const handleDeleteInterview = async (id: string) => {
+    const token = localStorage.getItem("auth_token");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+    const ok = window.confirm("Delete this interview? This cannot be undone.");
+    if (!ok) return;
+    try {
+      const res = await fetch(`/api/interview/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        throw new Error("Failed to delete interview");
+      }
+      setInterviews((prev) => prev.filter((i) => i._id !== id));
+    } catch (e) {
+      setError("Failed to delete interview. Please try again.");
+    }
+  };
+
   if (loading) {
     return <Loader />;
   }
@@ -127,18 +149,13 @@ export default function InterviewList() {
                 {getStatusBadge(interview.status)}
               </div>
 
-              {/* // experience, techStack, progress and score */}
+              {/* // experience, resume details, progress and score */}
               <div className="flex flex-col gap-2 mb-4 font-medium text-gray-400 text-md">
-                <p>Tech Stack</p>
-                <p className="flex gap-2 text-gray-200">
-                  {interview.techStack.map((tech: string, index: number) => (
-                    <span
-                      className="text-xs max-sm:text-[8px] px-2.5 py-1 rounded-full bg-[#352a31]/50 border border-[#453841]/50 text-gray-300"
-                      key={index}
-                    >
-                      {tech}
-                    </span>
-                  ))}
+                <p>Resume Details</p>
+                <p className="text-gray-200">
+                  {Array.isArray(interview.techStack)
+                    ? interview.techStack.join(" ")
+                    : String(interview.techStack || "")}
                 </p>
                 <div className="flex gap-20 mt-5 max-sm:gap-10">
                   <div className="">
@@ -219,6 +236,13 @@ export default function InterviewList() {
                       path_1="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                       onClick={() => handleViewAnalysis(interview._id)}
                     />
+                    <ContinueBtn
+                      color="indigo"
+                      text="Delete"
+                      path_1="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      path_2=""
+                      onClick={() => handleDeleteInterview(interview._id)}
+                    />
                   </>
                 )}
 
@@ -239,6 +263,14 @@ export default function InterviewList() {
                       text="Analysis"
                       path_1="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                       onClick={() => handleViewAnalysis(interview._id)}
+                    />
+                    {/* delete btn */}
+                    <ContinueBtn
+                      color="indigo"
+                      text="Delete"
+                      path_1="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      path_2=""
+                      onClick={() => handleDeleteInterview(interview._id)}
                     />
                   </>
                 )}

@@ -3,7 +3,10 @@ import { connectDB } from "@/lib/mongodb";
 import Interview from "@/models/Interview";
 import { getUserIdFromToken } from "@/lib/auth";
 import { generateInterviewQuestions } from "@/lib/gemini";
-import { extractTextFromPDF } from "@/lib/pdfExtractor";
+import { parsePdfResume, ParsedResume } from "@/lib/parseResume";
+import { MAX_CONTEXT_CHARS, SECTION_LIMITS } from "@/lib/resumeConfig";
+
+export const runtime = "nodejs";
 
 // default questions by category for fallback
 const DEFAULT_QUESTIONS = {
@@ -116,37 +119,143 @@ export async function POST(req: Request) {
     // parse form data
     const formData = await req.formData();
     const jobRole = formData.get("jobRole") as string;
-    const techStack = JSON.parse(formData.get("techStack") as string);
+    const techStackRaw = JSON.parse(formData.get("techStack") as string);
+    // Normalize resume details/tech stack: accept string or array, convert to tokens
+    const techStack: string[] = Array.isArray(techStackRaw)
+      ? (techStackRaw as string[])
+      : typeof techStackRaw === "string"
+      ? (techStackRaw
+          .toLowerCase()
+          .match(/[a-z0-9+#.]+/gi) || [])
+      : [];
     const yearsOfExperience = JSON.parse(
       formData.get("yearsOfExperience") as string
     );
     const resumeFile = formData.get("resume") as File | null;
 
-    if (!jobRole || !techStack) {
+    // Debug: log all form data keys
+    console.log("[Interview API] FormData keys:", Array.from(formData.keys()));
+    console.log("[Interview API] Resume in FormData:", formData.has("resume"));
+
+    if (!jobRole || (!techStack || techStack.length === 0)) {
       return NextResponse.json(
         { message: "All feilds are required" },
         { status: 400 }
       );
     }
 
-    // extract text from resume
+    // parse resume using layout-aware extractor
     let resumeText = "";
+    let parsedResume: ParsedResume | null = null;
+    console.log("[Interview API] Resume file received:", !!resumeFile, resumeFile?.name, resumeFile?.size);
+    if (resumeFile) {
+      console.log("[Interview API] Resume file type:", typeof resumeFile, resumeFile.constructor.name);
+    }
     try {
       if (resumeFile) {
-        resumeText = await extractTextFromPDF(resumeFile);
+        const buf = Buffer.from(await resumeFile.arrayBuffer());
+        console.log("[Interview API] Buffer created, size:", buf.length);
+        parsedResume = await parsePdfResume(buf);
+        
+        // If parsing returned scanned/failed result, log and set to null instead
+        if (parsedResume?.scanned) {
+          console.warn("[Interview API] PDF parsing failed or detected as scanned:", parsedResume.notes);
+          console.log("[Interview API] Continuing without resume context");
+          parsedResume = null;
+        } else {
+          // Debug: print parsed resume to server logs
+          console.log("[Interview API] Parsed resume:", JSON.stringify(parsedResume, null, 2));
+          resumeText = parsedResume.rawText || "";
+        }
+      } else {
+        console.log("[Interview API] No resume file provided");
       }
     } catch (error) {
-      console.error("error processing resume: ", error);
+      console.error("[Interview API] Error processing resume: ", error);
+      parsedResume = null;
     }
 
-    // generate questions using gemini
-    const context = resumeText
-      ? `Job Role: ${jobRole}, Tech Stack: ${techStack.join(
-          ", "
-        )}, Experience: ${yearsOfExperience} years. Resume: ${resumeText}`
-      : `Job Role: ${jobRole}, Tech Stack: ${techStack.join(
-          ", "
-        )}, Experience: ${yearsOfExperience} years`;
+    // Build a single structured context object including the parsed resume
+    const resumeForContext = parsedResume
+      ? {
+          scanned: parsedResume.scanned || false,
+          notes: parsedResume.notes || undefined,
+          // cap sections by configured limits
+          experience: (parsedResume.experience || []).slice(0, SECTION_LIMITS.experienceItems),
+          internships: (parsedResume.internships || []).slice(0, SECTION_LIMITS.experienceItems),
+          projects: (parsedResume.projects || []).slice(0, SECTION_LIMITS.projectItems),
+          skills: (parsedResume.skills || []).slice(0, SECTION_LIMITS.skillItems),
+          education: (parsedResume.education || []).slice(0, SECTION_LIMITS.educationItems),
+          confidence: parsedResume.confidence || undefined,
+          // rawText and otherSections omitted to keep size small
+        }
+      : undefined;
+
+    // Construct concise resume summary text
+    let resumeSummary = "";
+    if (parsedResume && !parsedResume.scanned) {
+      const parts: string[] = [];
+      if (resumeForContext?.experience?.length)
+        parts.push(`Experience: ${resumeForContext.experience.join(" | ")}`);
+      if (resumeForContext?.projects?.length)
+        parts.push(`Projects: ${resumeForContext.projects.join(" | ")}`);
+      if (resumeForContext?.skills?.length)
+        parts.push(`Skills: ${resumeForContext.skills.join(", ")}`);
+      if (resumeForContext?.education?.length)
+        parts.push(`Education: ${resumeForContext.education.join(" | ")}`);
+      resumeSummary = parts.join("\n");
+    } else if (parsedResume && parsedResume.scanned) {
+      resumeSummary = "PDF appears scanned or non-selectable; ignoring resume text.";
+    } else if (resumeText) {
+      resumeSummary = resumeText.slice(0, 2000);
+    }
+
+    const contextObj: any = {
+      jobRole,
+      techStack,
+      yearsOfExperience,
+      resume: resumeForContext || null,
+      resumeSummary: resumeSummary || null,
+    };
+
+    // Debug: print gathered context (object)
+    console.log("[Interview API] Context object:", JSON.stringify(contextObj, null, 2));
+    console.log("[Interview API] Resume included:", !!resumeForContext);
+    console.log("[Interview API] Resume summary length:", resumeSummary?.length || 0);
+    console.log("[Interview API] Combined context preview:", JSON.stringify({
+      jobRole,
+      techStack,
+      yearsOfExperience,
+      resume: resumeForContext ? "Resume data included" : undefined,
+      resumeSummary: resumeSummary ? "Resume summary included" : undefined,
+    }, null, 2));
+    console.log("[Interview API] Combined context string:", JSON.stringify(contextObj, null, 2));
+
+    // Stringify with size enforcement
+    let context = JSON.stringify(contextObj);
+    if (context.length > MAX_CONTEXT_CHARS) {
+      // If still too large, truncate resumeSummary proportionally
+      const baseObj = { ...contextObj, resumeSummary: undefined };
+      let baseStr = JSON.stringify(baseObj);
+      const remaining = Math.max(0, MAX_CONTEXT_CHARS - baseStr.length - 20);
+      const clippedSummary = (resumeSummary || "").slice(0, remaining);
+      context = JSON.stringify({ ...baseObj, resumeSummary: clippedSummary });
+    }
+
+    // Debug: print gathered context (final string)
+    console.log("[Interview API] Context length:", context.length);
+    console.log("[Interview API] Context string (truncated 2000 chars):", context.slice(0, 2000));
+    console.log("[Interview API] Sending combined context to Gemini API with resume data:", {
+      hasResume: !!resumeForContext,
+      hasResumeSummary: !!resumeSummary,
+      resumeItems: resumeForContext ? {
+        experience: (resumeForContext.experience || []).length,
+        projects: (resumeForContext.projects || []).length,
+        skills: (resumeForContext.skills || []).length,
+        education: (resumeForContext.education || []).length,
+        internships: (resumeForContext.internships || []).length,
+      } : null,
+    });
 
     let questions;
     let usedFallBack = false;
@@ -194,6 +303,14 @@ export async function POST(req: Request) {
           ? "interview created with default questions due to AI service limitation. Try again later for personalized questions."
           : "interview created successfully",
         interview: newInterview,
+        // Dev-only debug payload to surface gathered context in browser console
+        debug:
+          process.env.NODE_ENV !== "production"
+            ? {
+                contextObject: contextObj,
+                contextStringPreview: context.slice(0, 2000),
+              }
+            : undefined,
       },
       { status: 201 }
     );

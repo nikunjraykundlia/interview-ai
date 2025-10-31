@@ -70,50 +70,95 @@ export const generateInterviewQuestions = async (
       generationConfig,
     });
 
-    const prompt = `You are an expert technical interviewer.
-    - Generate exactly 15 interview questions from ${context}.
-    - Goal:
-    - The first 3 questions MUST be soft-skill questions commonly asked across companies.
-    - Exactly 5 questions in total MUST be soft-skill; the remaining 10 MUST be technical.
-    - Place the remaining two soft-skill questions at positions 8 and 13.
-    - Keep the tone professional and concise, suitable for a formal interview loop.
+    // Debug: log the context being sent to Gemini
+    console.log("[Gemini API] Context received (first 500 chars):", context.slice(0, 500));
+    console.log("[Gemini API] Full context length:", context.length);
+    
+    // Parse context once and extract key info
+    const parsedContext = JSON.parse(context);
+    const jobRole = parsedContext.jobRole || "software developer";
+    const techStack = parsedContext.techStack || [];
+    const resume = parsedContext.resume || {};
+    const resumeSummary = parsedContext.resumeSummary || "";
+    
+    // Log the parsed structure
+    console.log("[Gemini API] Parsed context structure:", {
+      jobRole,
+      techStack,
+      yearsOfExperience: parsedContext.yearsOfExperience,
+      hasResume: !!parsedContext.resume,
+      hasResumeSummary: !!parsedContext.resumeSummary,
+      resumeSummary,
+      resumeStructure: parsedContext.resume ? {
+        experience: parsedContext.resume.experience?.length || 0,
+        projects: parsedContext.resume.projects?.length || 0,
+        skills: parsedContext.resume.skills?.length || 0,
+        education: parsedContext.resume.education?.length || 0,
+        internships: parsedContext.resume.internships?.length || 0,
+      } : null,
+    });
+    
+    // Log the actual resume data being used for questions
+    console.log("[Gemini API] Resume data for questions:", {
+      resumeSummary,
+      projects: resume.projects,
+      experience: resume.experience,
+      skills: resume.skills,
+      internships: resume.internships,
+    });
 
-    Output rules (strict):
-    - Return ONLY valid JSON; no prose, markdown, or comments.
-    - JSON shape must be exactly:
-    { "questions": ["question1", "question2", ...] }
-    - The "questions" array length MUST be 15.
-    - Each element MUST be a single-string question ending with "?" (no numbering, no labels, no multi-part).
-    - Use standard JSON quoting (double quotes) with proper escaping; no trailing commas.
+    // Build resume details section
+    const resumeDetails: string[] = [];
+    if (resume?.projects?.length > 0) {
+      resumeDetails.push(`Projects: ${JSON.stringify(resume.projects)}`);
+    }
+    if (resume?.experience?.length > 0) {
+      resumeDetails.push(`Experience: ${JSON.stringify(resume.experience)}`);
+    }
+    if (resume?.internships?.length > 0) {
+      resumeDetails.push(`Internships: ${JSON.stringify(resume.internships)}`);
+    }
+    if (resume?.skills?.length > 0) {
+      resumeDetails.push(`Skills: ${resume.skills.join(", ")}`);
+    }
+    if (resume?.education?.length > 0) {
+      resumeDetails.push(`Education: ${JSON.stringify(resume.education)}`);
+    }
+    
+    const hasResumeData = resumeDetails.length > 0;
+    const resumeDetailsSection = hasResumeData ? `\n\nADDITIONAL RESUME DETAILS:\n${resumeDetails.join("\n")}` : "";
 
-    Soft-skill guidance:
-    - For the first 3 questions, choose from these common themes:
-    1) Ownership/accountability under setbacks.
-    2) Handling conflict or disagreement with a teammate/stakeholder.
-    3) Prioritization/time management amid ambiguity.
-    - The additional soft-skill questions at positions 8 and 13 should focus on:
-    4) Receiving/giving feedback and adapting.
-    5) Cross-functional communication or influencing without authority.
-    - Keep each soft-skill question scenario-based, neutral, and ≤ 28 words.
+    // Build technical rules section to avoid template literal nesting issues
+    const techStackStr = techStack.length > 0 ? techStack.join(", ") : "general software development";
+    const technicalRules = hasResumeData 
+      ? "- At least 6 of the 12 technical questions MUST reference specific items from the resume\n- Use exact names from the resume (projects, companies, technologies, frameworks)\n- Reference concrete experiences, projects, or technologies from the resume above\n- Examples from resume: \"How did you [specific task] in [ProjectName]?\""
+      : `- Focus on ${techStackStr} since no resume was provided`;
 
-    Technical guidance:
-    - Derive topics directly from ${context}. If ${context} lacks detail, assume modern full-stack web development (Node.js/TypeScript/React/Next.js, REST/GraphQL, SQL/NoSQL, testing, security, performance, cloud, CI/CD).
-    - Mix fundamentals and applied problem-solving: API design, data modeling, authentication/authorization, caching/performance, debugging, testing strategy, scalability, reliability, system design at the appropriate scope.
-    - Avoid trivia and brainteasers; prefer “How would you…”, “What trade-offs…”, “Given X, how would you…”.
-    - Keep each technical question ≤ 28 words, specific, and unambiguous.
+    const prompt = `You are an expert technical interviewer. Generate exactly 15 personalized interview questions.
 
-    Language:
-    - Use the language implied by ${context}; default to English.
+CONTEXT:
+- Job Role: ${jobRole}
+- Tech Stack: ${techStack.join(", ")}
+- Years of Experience: ${parsedContext.yearsOfExperience || 0}
+- Resume Data: ${resumeSummary || "No resume provided"}${resumeDetailsSection}
 
-    Validation checklist BEFORE responding (internal):
-    1) Count = 15.
-    2) Q1–Q3 are soft-skill; exactly 5 soft-skill in total; additional soft-skill at Q8 and Q13.
-    3) All items end with "?" and are single sentences.
-    4) JSON is syntactically valid and matches the exact shape.
-    5) No explanations or extra keys.
+REQUIREMENTS:
+1. First 3 questions: Soft-skill questions based on their experience/internships
+2. Remaining 12 questions: Technical questions
 
-    Now generate the JSON for ${context}.
-`;
+CRITICAL RULES FOR TECHNICAL QUESTIONS:
+${technicalRules}
+
+Keep questions professional, concise, and specific. Each question should be a single sentence ending with "?".
+
+Return ONLY valid JSON in this exact format:
+{
+  "questions": [
+    "Question 1?",
+    "Question 2?",
+    ...15 questions total
+  ]
+}`;
 
     const result = await retryWithExponentialBackoff(() =>
       model.generateContent(prompt)

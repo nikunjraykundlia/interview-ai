@@ -10,9 +10,11 @@ const InterviewDetails = ({ interview }: { interview: any }) => {
           <p className="text-sm font-medium uppercase">{interview.jobRole}</p>
         </div>
         <div>
-          <p className="text-zinc-400">Tech Stack:</p>
+          <p className="text-zinc-400">Resume Details:</p>
           <p className="text-sm font-medium uppercase">
-            {interview.techStack.join(", ")}
+            {Array.isArray(interview.techStack)
+              ? interview.techStack.join(" ")
+              : String(interview.techStack || "")}
           </p>
         </div>
         <div>

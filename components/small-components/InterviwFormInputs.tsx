@@ -10,6 +10,7 @@ interface InputProps {
   min?: number;
   max?: number;
   accept?: string;
+  inputClassName?: string;
 }
 
 const InterviwFormInputs = ({
@@ -21,12 +22,13 @@ const InterviwFormInputs = ({
   min,
   max,
   accept,
+  inputClassName,
 }: InputProps) => {
   return (
     <div className="flex flex-col w-[100%]">
       <label className="mb-2 text-sm">{label}</label>
       <input
-        className="border py-2 rounded-lg px-4 border-zinc-700 w-[100%]"
+        className={`border py-2 rounded-lg px-4 border-zinc-700 w-[100%] ${inputClassName ? inputClassName : ""}`}
         type={type}
         required
         placeholder={placeholder}

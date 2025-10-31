@@ -44,17 +44,12 @@ const InterviewNav = ({ interview }: { interview: any }) => {
         <div className="flex items-center gap-2 max-sm:text-[10px] text-sm text-slate-300">
           <span className="font-medium text-[rgb(184,122,156)] bg-[#b87a9c]/10 px-2 py-1 rounded-md flex items-center gap-1">
             <Lock className="w-3 h-3" />
-            Tech Stack:
+            Resume Details:
           </span>
           <div className="flex gap-2">
-            {interview.techStack.map((tech: string, index: number) => (
-              <span
-                key={index}
-                className="bg-slate-800/70 px-2 py-1 max-sm:text-[8px] rounded-md text-xs border border-slate-700/50 hover:border-[#b87a9c]/30 transition-all cursor-default"
-              >
-                {tech}
-              </span>
-            ))}
+            <span className="bg-slate-800/70 px-2 py-1 max-sm:text-[8px] rounded-md text-xs border border-slate-700/50 hover:border-[#b87a9c]/30 transition-all cursor-default">
+              {Array.isArray(interview.techStack) ? interview.techStack.join(" ") : String(interview.techStack || "")}
+            </span>
           </div>
         </div>
         <div className="flex items-center gap-2 px-3 py-1 text-sm border rounded-md max-sm:text-xs bg-slate-800/70 border-slate-700/50">

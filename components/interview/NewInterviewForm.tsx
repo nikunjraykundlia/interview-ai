@@ -43,14 +43,25 @@ const NewInterviewForm = ({
 
     const formData = new FormData();
     formData.append("jobRole", jobRole);
-    formData.append(
-      "techStack",
-      JSON.stringify(techStack.split(",").map((item) => item.trim()))
-    );
+    formData.append("techStack", JSON.stringify(techStack));
     formData.append("yearsOfExperience", yearsOfExperience.toString());
+
+    // Debug: log resume file before sending
+    // eslint-disable-next-line no-console
+    console.log("[Client] Resume file before sending:", {
+      hasFile: !!resumeFile,
+      fileName: resumeFile?.name,
+      fileSize: resumeFile?.size,
+      fileType: resumeFile?.type,
+    });
 
     if (resumeFile) {
       formData.append("resume", resumeFile);
+      // eslint-disable-next-line no-console
+      console.log("[Client] Resume added to FormData");
+    } else {
+      // eslint-disable-next-line no-console
+      console.log("[Client] No resume file to upload");
     }
 
     try {
@@ -69,6 +80,12 @@ const NewInterviewForm = ({
         body: formData,
       });
 
+      // Check if response is JSON before parsing
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Server error: Expected JSON response but received HTML. Check server logs for details.");
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -84,6 +101,15 @@ const NewInterviewForm = ({
       // check if we are using fallback questions
       if (data.message && data.message.includes("default questions")) {
         setApiWarning(data.message);
+      }
+
+      // Debug: log gathered context from backend (dev-only payload)
+      if (data.debug) {
+        // Print the full object and a preview string
+        // eslint-disable-next-line no-console
+        console.log("[Client] Combined Context Object:", JSON.stringify(data.debug.contextObject, null, 2));
+        // eslint-disable-next-line no-console
+        console.log("[Client] Context String Preview (first 2000 chars):", data.debug.contextStringPreview);
       }
 
       onStartInterview(data.interview);
@@ -118,11 +144,12 @@ const NewInterviewForm = ({
 
           {/* tech stack */}
           <InterviwFormInputs
-            label="Tech-Stack (comma-seperated)"
+            label="Enter Resume Details"
             type="text"
-            placeholder="e.g. React, NodeJs, TypeScript"
+            placeholder="Mention your Skills, Projects and Experience"
             value={techStack}
             onChange={(e) => setTechStack(e.target.value)}
+            inputClassName="py-4"
           />
 
           {/* years of experience */}
@@ -142,7 +169,17 @@ const NewInterviewForm = ({
               className="border py-2 cursor-pointer rounded-lg px-4 border-zinc-700 w-[100%]"
               type="file"
               accept=".pdf"
-              onChange={(e) => setResumeFile(e.target.files?.[0] || null)}
+              onChange={(e) => {
+                const file = e.target.files?.[0] || null;
+                setResumeFile(file);
+                // eslint-disable-next-line no-console
+                console.log("[Client] File selected:", {
+                  hasFile: !!file,
+                  fileName: file?.name,
+                  fileSize: file?.size,
+                  fileType: file?.type,
+                });
+              }}
             />
 
             {fileError && (
