@@ -16,7 +16,7 @@ const NavBar = () => {
       <div className="flex items-center gap-3">
         <Link href={"/"} className="flex items-center gap-3">
           <Image width={60} height={60} src="/images/Logo.svg" alt="Logo" />
-          {pathname !== "/" && pathname !== "/dashboard" && (
+          {pathname !== "/" && pathname !== "/dashboard" && pathname !== "/login" && (
             <h2 className="text-2xl font-medium text-white sm:text-3xl">
               interwise
             </h2>
