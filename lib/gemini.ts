@@ -1,6 +1,16 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+let genAIInstance: GoogleGenerativeAI | null = null;
+const getGenAI = () => {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) {
+    throw new Error("Missing GEMINI_API_KEY environment variable");
+  }
+  if (!genAIInstance) {
+    genAIInstance = new GoogleGenerativeAI(key);
+  }
+  return genAIInstance;
+};
 
 // Configure for Flash model
 const generationConfig = {
@@ -65,7 +75,7 @@ export const generateInterviewQuestions = async (
   context: string
 ): Promise<string[]> => {
   try {
-    const model = genAI.getGenerativeModel({
+    const model = getGenAI().getGenerativeModel({
       model: "gemini-2.0-flash",
       generationConfig,
     });
@@ -189,7 +199,7 @@ export const analyzeResponse = async (
   answer: string
 ): Promise<AnalysisResult> => {
   try {
-    const model = genAI.getGenerativeModel({
+    const model = getGenAI().getGenerativeModel({
       model: "gemini-2.0-flash",
       generationConfig,
     });
@@ -246,7 +256,7 @@ export const generateInterviewFeedback = async (
   interview: any
 ): Promise<FeedbackResult> => {
   try {
-    const model = genAI.getGenerativeModel({
+    const model = getGenAI().getGenerativeModel({
       model: "gemini-2.0-flash",
       generationConfig,
     });
