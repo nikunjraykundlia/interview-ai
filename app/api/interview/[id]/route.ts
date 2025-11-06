@@ -167,7 +167,7 @@ export async function GET(
     }
 
     // get user id from token
-    const userId = getUserIdFromToken(token);
+    const userId = await getUserIdFromToken(token);
 
     // get interview id from params
     // const interviewId = id;

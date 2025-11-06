@@ -9,7 +9,7 @@ export async function GET(req: Request) {
 
     // get token from autborization header
     const authHeader = req.headers.get("Authorization");
-    const token = authHeader?.startsWith("Bearer")
+    const token = authHeader?.startsWith("Bearer ")
       ? authHeader.substring(7)
       : null;
 
