@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     }
 
     // get user id from token
-    const userId = getUserIdFromToken(token);
+    const userId = await getUserIdFromToken(token);
 
     // find all interviews for the user
     const interviews = await Interview.find({ user: userId })

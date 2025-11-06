@@ -28,7 +28,7 @@ export async function POST(
     }
 
     // get user id from token
-    const userId = getUserIdFromToken(token);
+    const userId = await getUserIdFromToken(token);
 
     const { questionIndex, answer, analysis } = await req.json();
 
@@ -112,7 +112,7 @@ export async function DELETE(
     }
 
     // get user id from token
-    const userId = getUserIdFromToken(token);
+    const userId = await getUserIdFromToken(token);
 
     // find interview
     const interview = await Interview.findById(id);

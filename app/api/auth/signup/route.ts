@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { SignJWT } from 'jose';
 import User from "@/models/User";
 import { connectDB } from "@/lib/mongodb";
 
@@ -33,12 +33,11 @@ export async function POST(req: Request) {
 
         // Generate JWT token for automatic login
         const tokenData = { userId: newUser._id.toString(), email: newUser.email };
-        
-        const token = jwt.sign(
-            tokenData,
-            process.env.JWT_SECRET!,
-            { expiresIn: '7d' }
-        );
+        const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+        const token = await new SignJWT(tokenData)
+            .setProtectedHeader({ alg: 'HS256' })
+            .setExpirationTime('7d')
+            .sign(secret);
 
         // Return token directly in the response
         return NextResponse.json({
