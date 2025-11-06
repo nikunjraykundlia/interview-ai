@@ -7,6 +7,7 @@ import { parsePdfResume, ParsedResume } from "@/lib/parseResume";
 import { MAX_CONTEXT_CHARS, SECTION_LIMITS } from "@/lib/resumeConfig";
 
 export const runtime = "nodejs";
+export const dynamic = 'force-dynamic';
 
 // default questions by category for fallback
 const DEFAULT_QUESTIONS = {
@@ -114,7 +115,7 @@ export async function POST(req: Request) {
     }
 
     // get user id from token
-    const userId = getUserIdFromToken(token);
+    const userId = await getUserIdFromToken(token);
 
     // parse form data
     const formData = await req.formData();
