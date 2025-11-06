@@ -13,7 +13,7 @@ const InterviewNav = ({ interview }: { interview: any }) => {
             width={40}
             height={40}
             className="max-sm:hidden"
-            src="/images/logo.svg"
+            src="/images/Logo.svg"
             alt="Logo Image"
           />
           <div className="text-sm leading-2 max-sm:text-xs">
