@@ -80,6 +80,126 @@ export default function InterviewSession({
     }
   }, [currentIndex, interview]);
 
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const interviewRef = useRef(interview);
+  const onInterviewUpdateRef = useRef(onInterviewUpdate);
+
+  // Keep refs in sync with props
+  useEffect(() => {
+    interviewRef.current = interview;
+    onInterviewUpdateRef.current = onInterviewUpdate;
+  }, [interview, onInterviewUpdate]);
+
+  // Poll for analysis updates - SIMPLIFIED and ROBUST approach
+  useEffect(() => {
+    if (!interview || !interview._id || !interview.questions || !onInterviewUpdate) {
+      return;
+    }
+
+    const interviewId = interview._id;
+    let isPollingActive = true;
+
+    // Simplified polling function that always checks for changes
+    const pollForAnalysis = async () => {
+      if (!isPollingActive) return;
+
+      try {
+        const token = localStorage.getItem("auth_token");
+        if (!token) {
+          return;
+        }
+
+        const response = await fetch(`/api/interview/${interviewId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          cache: "no-store",
+        });
+
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+        const fetchedInterview = data.interview;
+
+        if (!fetchedInterview || !fetchedInterview.questions) {
+          return;
+        }
+
+        // Get latest interview state from ref
+        const currentInterview = interviewRef.current;
+        if (!currentInterview || !currentInterview.questions) {
+          return;
+        }
+
+        // SIMPLE COMPARISON: Check if ANY question's analysis has changed
+        // Compare by creating a simple signature of analysis data
+        const currentQuestions = currentInterview.questions || [];
+        const fetchedQuestions = fetchedInterview.questions || [];
+        
+        let foundUpdate = false;
+
+        for (let i = 0; i < Math.max(currentQuestions.length, fetchedQuestions.length); i++) {
+          const currentQ = currentQuestions[i];
+          const fetchedQ = fetchedQuestions[i];
+
+          if (!currentQ || !fetchedQ) continue;
+
+          // Check if question has an answer
+          const hasAnswer = fetchedQ.answer && fetchedQ.answer.trim() !== "";
+          if (!hasAnswer) continue;
+
+          // Get analysis scores (default to null if not present)
+          const currentScore = currentQ.analysis?.score ?? null;
+          const fetchedScore = fetchedQ.analysis?.score ?? null;
+
+          // Check if fetched interview has analysis but current doesn't
+          const currentHasAnalysis = currentScore !== null && currentQ.analysis?.technicalFeedback;
+          const fetchedHasAnalysis = fetchedScore !== null && fetchedQ.analysis?.technicalFeedback;
+
+          // If fetched has analysis and current doesn't, that's an update!
+          if (!currentHasAnalysis && fetchedHasAnalysis) {
+            foundUpdate = true;
+            console.log(`[Polling] ✅ NEW ANALYSIS DETECTED for Q${i + 1}! Score: ${fetchedScore}`);
+            break;
+          }
+
+          // Also check if scores are different (for re-analysis)
+          if (currentHasAnalysis && fetchedHasAnalysis && currentScore !== fetchedScore) {
+            foundUpdate = true;
+            console.log(`[Polling] ✅ ANALYSIS UPDATED for Q${i + 1}! Old: ${currentScore}, New: ${fetchedScore}`);
+            break;
+          }
+        }
+
+        // Always update if we found any changes
+        if (foundUpdate) {
+          console.log("[Polling] 🔄 UPDATING INTERVIEW STATE with new analysis data");
+          const updateCallback = onInterviewUpdateRef.current;
+          if (updateCallback) {
+            updateCallback(fetchedInterview);
+          }
+        }
+      } catch (error) {
+        console.error("[Polling] ❌ Error polling for analysis:", error);
+      }
+    };
+
+    // Start polling immediately, then every 1.5 seconds for fast updates
+    pollForAnalysis(); // Immediate check
+    pollingIntervalRef.current = setInterval(pollForAnalysis, 1500);
+
+    // Cleanup
+    return () => {
+      isPollingActive = false;
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
+      }
+    };
+  }, [interview?._id]); // Only restart if interview ID changes
+
   // clean up speech recoginiton on unmount
   useEffect(() => {
     return () => {
@@ -90,6 +210,11 @@ export default function InterviewSession({
 
       if (timeRef.current) {
         clearInterval(timeRef.current);
+      }
+
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+        pollingIntervalRef.current = null;
       }
     };
   }, []);

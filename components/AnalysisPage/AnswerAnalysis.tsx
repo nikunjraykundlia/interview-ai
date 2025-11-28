@@ -36,22 +36,6 @@ const AnswerAnalysis = ({
         />
       </div>
 
-      {/* key points */}
-      <div className="mb-6">
-        <h3 className="font-medium text-gray-300 mb-2">Key Points</h3>
-        <div className="bg-pink-300/10 p-4 rounded-md">
-          <ul className="list-disc pl-5 space-y-1">
-            {activeQuestion.analysis.keyPoints ? (
-              activeQuestion.analysis.keyPoints.map(
-                (point: string, index: number) => <li key={index}>{point}</li>
-              )
-            ) : (
-              <li>No key points provide</li>
-            )}
-          </ul>
-        </div>
-      </div>
-
       {/* improvement suggestion */}
       <div>
         <h3 className="font-medium text-gray-300 mb-2">

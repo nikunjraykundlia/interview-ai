@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Loader from "@/components/Loader";
@@ -27,54 +27,162 @@ export default function AnalysisPage({ params }: AnalysisProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeQuestionIndex, setActiveQuestionIndex] = useState(0);
+  const interviewRef = useRef<any>(null);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    interviewRef.current = interview;
+  }, [interview]);
+
+  const fetchInterview = async () => {
+    // get token from localstorage
+    try {
+      const token = localStorage.getItem("auth_token");
+
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+
+      // fetch interview
+      const response = await fetch(`/api/interview/${interviewId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        // add cache: 'no-store' to prevent caching
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch interview data");
+      }
+
+      const data = await response.json();
+
+      // allow both completed and in-progress interviews
+      if (
+        data.interview.status !== "completed" &&
+        data.interview.status !== "in-progress"
+      ) {
+        router.push(`/interview/${interviewId}`);
+        return;
+      }
+      setInterview(data.interview);
+      console.log(data.interview);
+    } catch (error) {
+      console.error("Error fetching interviews: ", error);
+      setError("Failed to load interview analysis. Please try again later");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    //fetch interview data
-    const fetchInterview = async () => {
-      // get token from localstorage
+    // Initial fetch
+    fetchInterview();
+  }, [interviewId, router]);
+
+  // Poll for analysis updates - SIMPLIFIED and ROBUST approach
+  useEffect(() => {
+    if (!interview || loading || !interview.questions) {
+      return;
+    }
+
+    let isPollingActive = true;
+
+    // Simplified polling function that always checks for changes
+    const pollForAnalysis = async () => {
+      if (!isPollingActive) return;
+
       try {
         const token = localStorage.getItem("auth_token");
-
         if (!token) {
-          router.push("/login");
           return;
         }
 
-        // fetch interview
         const response = await fetch(`/api/interview/${interviewId}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          // add cache: 'no-store' to prevent caching
           cache: "no-store",
         });
 
         if (!response.ok) {
-          throw new Error("Failed to fetch interview data");
+          return;
         }
 
         const data = await response.json();
+        const fetchedInterview = data.interview;
 
-        // allow both completed and in-progress interviews
-        if (
-          data.interview.status !== "completed" &&
-          data.interview.status !== "in-progress"
-        ) {
-          router.push(`/interview/${interviewId}`);
+        if (!fetchedInterview || !fetchedInterview.questions) {
           return;
         }
-        setInterview(data.interview);
-        console.log(data.interview);
+
+        // Get latest interview state from ref
+        const currentInterview = interviewRef.current;
+        if (!currentInterview || !currentInterview.questions) {
+          return;
+        }
+
+        // SIMPLE COMPARISON: Check if ANY question's analysis has changed
+        const currentQuestions = currentInterview.questions || [];
+        const fetchedQuestions = fetchedInterview.questions || [];
+        
+        let foundUpdate = false;
+
+        for (let i = 0; i < Math.max(currentQuestions.length, fetchedQuestions.length); i++) {
+          const currentQ = currentQuestions[i];
+          const fetchedQ = fetchedQuestions[i];
+
+          if (!currentQ || !fetchedQ) continue;
+
+          // Check if question has an answer
+          const hasAnswer = fetchedQ.answer && fetchedQ.answer.trim() !== "";
+          if (!hasAnswer) continue;
+
+          // Get analysis scores (default to null if not present)
+          const currentScore = currentQ.analysis?.score ?? null;
+          const fetchedScore = fetchedQ.analysis?.score ?? null;
+
+          // Check if fetched interview has analysis but current doesn't
+          const currentHasAnalysis = currentScore !== null && currentQ.analysis?.technicalFeedback;
+          const fetchedHasAnalysis = fetchedScore !== null && fetchedQ.analysis?.technicalFeedback;
+
+          // If fetched has analysis and current doesn't, that's an update!
+          if (!currentHasAnalysis && fetchedHasAnalysis) {
+            foundUpdate = true;
+            console.log(`[Analysis Page Polling] ✅ NEW ANALYSIS DETECTED for Q${i + 1}! Score: ${fetchedScore}`);
+            break;
+          }
+
+          // Also check if scores are different (for re-analysis)
+          if (currentHasAnalysis && fetchedHasAnalysis && currentScore !== fetchedScore) {
+            foundUpdate = true;
+            console.log(`[Analysis Page Polling] ✅ ANALYSIS UPDATED for Q${i + 1}! Old: ${currentScore}, New: ${fetchedScore}`);
+            break;
+          }
+        }
+
+        // Always update if we found any changes
+        if (foundUpdate) {
+          console.log("[Analysis Page Polling] 🔄 UPDATING INTERVIEW STATE with new analysis data");
+          setInterview(fetchedInterview);
+        }
       } catch (error) {
-        console.error("Error fetching interviews: ", error);
-        setError("Failed to load interview analysis. Please try again later");
-      } finally {
-        setLoading(false);
+        console.error("[Analysis Page Polling] ❌ Error polling for analysis:", error);
       }
     };
 
-    fetchInterview();
-  }, [interviewId, router]);
+    // Start polling immediately, then every 1.5 seconds for fast updates
+    pollForAnalysis(); // Immediate check
+    const pollInterval = setInterval(pollForAnalysis, 1500);
+
+    // Cleanup
+    return () => {
+      isPollingActive = false;
+      clearInterval(pollInterval);
+    };
+  }, [interviewId, loading, interview?._id]); // Only restart if interview ID changes
 
   // logic for marks data
   const getScoreColor = (score: number) => {
