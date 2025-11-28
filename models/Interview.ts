@@ -50,7 +50,15 @@ const interviewSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    resumeUrl: {
+      type: String,
+      default: "",
+    },
     questions: [questionSchema],
+    workflowQuestions: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
     overallScore: {
       type: Number,
       default: 0,

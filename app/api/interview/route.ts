@@ -1,103 +1,149 @@
 import { NextResponse } from "next/server";
+import { Buffer } from "buffer";
+import ImageKit from "imagekit";
 import { connectDB } from "@/lib/mongodb";
 import Interview from "@/models/Interview";
 import { getUserIdFromToken } from "@/lib/auth";
-import { generateInterviewQuestions } from "@/lib/gemini";
-import { parsePdfResume, ParsedResume } from "@/lib/parseResume";
-import { MAX_CONTEXT_CHARS, SECTION_LIMITS } from "@/lib/resumeConfig";
 
 export const runtime = "nodejs";
 export const dynamic = 'force-dynamic';
 
-// default questions by category for fallback
-const DEFAULT_QUESTIONS = {
-  frontend: [
-    "Explain the difference between localStorage, sessionStorage, and cookies.",
-    "What are React hooks and how do they improve component development?",
-    "Describe how you would optimize a web application's performance.",
-    "Explain the concept of responsive design and how you implement it.",
-    "What is the virtual DOM in React and why is it important?",
-    "Describe your experience with state management libraries like Redux or Context API.",
-  ],
-  backend: [
-    "Explain RESTful API design principles and best practices.",
-    "How do you handle database transactions and ensure data integrity?",
-    "Describe your experience with authentication and authorization mechanisms.",
-    "How would you design a scalable microservice architecture?",
-    "Explain how you would implement error handling in a backend application.",
-    "Describe your approach to API security and preventing common vulnerabilities.",
-  ],
-  fullstack: [
-    "Explain how you would structure a full-stack application from frontend to backend.",
-    "Describe your experience with API integration between frontend and backend.",
-    "How do you handle state management across the full application stack?",
-    "Explain your approach to testing in a full-stack application.",
-    "Describe your experience with deployment and CI/CD pipelines.",
-    "How would you implement real-time features in a full-stack application?",
-  ],
-  default: [
-    "Describe a challenging technical problem you've solved recently.",
-    "How do you stay updated with the latest technologies in your field?",
-    "Explain your approach to debugging complex issues.",
-    "Describe your experience working in agile development environments.",
-    "How do you ensure code quality and maintainability?",
-    "Describe your experience with version control and collaborative development.",
-  ],
+const WORKFLOW_ENDPOINT =
+  process.env.N8N_WORKFLOW_URL ??
+  "https://goartificialnow.app.n8n.cloud/webhook/generate-interview-question";
+
+const IMAGEKIT_UPLOAD_URL =
+  process.env.IMAGEKIT_UPLOAD_URL ??
+  "https://upload.imagekit.io/api/v1/files/upload";
+const IMAGEKIT_PUBLIC_KEY = process.env.IMAGEKIT_PUBLIC_KEY;
+const IMAGEKIT_PRIVATE_KEY = process.env.IMAGEKIT_PRIVATE_KEY;
+const IMAGEKIT_URL_ENDPOINT = process.env.IMAGEKIT_URL_ENDPOINT;
+const IMAGEKIT_FOLDER = process.env.IMAGEKIT_FOLDER;
+
+const imagekit = new ImageKit({
+  publicKey: IMAGEKIT_PUBLIC_KEY || "",
+  privateKey: IMAGEKIT_PRIVATE_KEY || "",
+  urlEndpoint: IMAGEKIT_URL_ENDPOINT || "",
+});
+
+const tokenize = (value: string): string[] =>
+  value
+    .toLowerCase()
+    .match(/[a-z0-9+#.]+/gi)?.map((token) => token.toLowerCase()) ?? [];
+
+const buildTechStack = (jobDescription: string, jobRole: string): string[] => {
+  const descriptionTokens = tokenize(jobDescription);
+  if (descriptionTokens.length > 0) {
+    return descriptionTokens;
+  }
+
+  const roleTokens = tokenize(jobRole);
+  if (roleTokens.length > 0) {
+    return roleTokens;
+  }
+
+  return ["general"];
 };
 
-const getFallBackQuestions = (
-  jobRole: string,
-  techStack: string[]
-): string[] => {
-  const role = jobRole.toLowerCase();
-  const stack = techStack.map((tech) => tech.toLowerCase());
+const isStringArray = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.every((item) => typeof item === "string");
 
-  if (
-    role.includes("frontend") ||
-    stack.some((tech) =>
-      [
-        "react",
-        "vue",
-        "angular",
-        "javascript",
-        "typescript",
-        "html",
-        "css",
-      ].includes(tech)
-    )
-  ) {
-    return DEFAULT_QUESTIONS.frontend;
+const extractQuestions = (payload: any): string[] => {
+  const stack: any[] = [payload];
+  const seen = new Set<any>();
+
+  while (stack.length) {
+    const current = stack.pop();
+    if (current === undefined || current === null) {
+      continue;
+    }
+
+    if (isStringArray(current)) {
+      return current;
+    }
+
+    if (typeof current !== "object") {
+      continue;
+    }
+
+    if (seen.has(current)) {
+      continue;
+    }
+    seen.add(current);
+
+    const directCandidates = [
+      (current as any)?.Top15Questions,
+      (current as any)?.questions,
+      (current as any)?.result?.questions,
+      (current as any)?.data?.questions,
+      (current as any)?.output?.questions,
+      (current as any)?.json?.questions,
+    ];
+
+    for (const candidate of directCandidates) {
+      if (isStringArray(candidate)) {
+        return candidate;
+      }
+    }
+
+    if (Array.isArray(current)) {
+      stack.push(...current);
+    } else {
+      stack.push(
+        (current as any)?.result,
+        (current as any)?.data,
+        (current as any)?.output,
+        (current as any)?.json
+      );
+    }
   }
 
-  if (
-    role.includes("backend") ||
-    stack.some((tech) =>
-      [
-        "node",
-        "express",
-        "django",
-        "flask",
-        "spring",
-        "java",
-        "python",
-        "c#",
-        ".net",
-      ].includes(tech)
-    )
-  ) {
-    return DEFAULT_QUESTIONS.backend;
+  return [];
+};
+
+const ensureDataUrl = (base64: string, mimeType?: string): string => {
+  const trimmed = base64.trim();
+  if (trimmed.toLowerCase().startsWith("data:")) {
+    return trimmed;
   }
 
-  if (
-    role.includes("fullstack") ||
-    role.includes("full stack") ||
-    (stack.some((tech) => ["react", "vue", "angular"].includes(tech)) &&
-      stack.some((tech) => ["node", "express", "django"].includes(tech)))
-  ) {
-    return DEFAULT_QUESTIONS.fullstack;
+  const normalized = trimmed.replace(/^data:[^,]+,/i, "");
+  const safeMime = mimeType?.trim() || "application/pdf";
+  return `data:${safeMime};base64,${normalized}`;
+};
+
+const fileToDataUrl = async (file: File): Promise<string> => {
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const base64 = buffer.toString("base64");
+  const mimeType = file.type || "application/pdf";
+  return `data:${mimeType};base64,${base64}`;
+};
+const uploadResumeToImageKit = async (
+  fileName: string,
+  dataUrl: string
+): Promise<string> => {
+  if (!IMAGEKIT_PUBLIC_KEY || !IMAGEKIT_PRIVATE_KEY || !IMAGEKIT_URL_ENDPOINT) {
+    throw new Error("ImageKit credentials are not configured");
   }
 
-  return DEFAULT_QUESTIONS.default;
+  const base64File = dataUrl.replace(/^data:[^,]+,/, "");
+
+  try {
+    const response = await imagekit.upload({
+      file: base64File,
+      fileName,
+      folder: IMAGEKIT_FOLDER || undefined,
+    });
+
+    if (!response?.url) {
+      throw new Error("Failed to upload resume to ImageKit");
+    }
+
+    return response.url;
+  } catch (err) {
+    console.error("[Interview API] ImageKit upload failed", err);
+    throw new Error("Failed to upload resume to ImageKit");
+  }
 };
 
 export async function POST(req: Request) {
@@ -117,227 +163,219 @@ export async function POST(req: Request) {
     // get user id from token
     const userId = await getUserIdFromToken(token);
 
-    // parse form data
-    const formData = await req.formData();
-    const jobRole = formData.get("jobRole") as string;
-    const techStackRaw = JSON.parse(formData.get("techStack") as string);
-    // Normalize resume details/tech stack: accept string or array, convert to tokens
-    const techStack: string[] = Array.isArray(techStackRaw)
-      ? (techStackRaw as string[])
-      : typeof techStackRaw === "string"
-      ? (techStackRaw
-          .toLowerCase()
-          .match(/[a-z0-9+#.]+/gi) || [])
-      : [];
-    const yearsOfExperience = JSON.parse(
-      formData.get("yearsOfExperience") as string
-    );
-    const resumeFile = formData.get("resume") as File | null;
+    const contentType = req.headers.get("content-type") || "";
+    let requestPayload: Record<string, any> = {};
 
-    // Debug: log all form data keys
-    console.log("[Interview API] FormData keys:", Array.from(formData.keys()));
-    console.log("[Interview API] Resume in FormData:", formData.has("resume"));
-
-    if (!jobRole || (!techStack || techStack.length === 0)) {
+    if (contentType.includes("application/json")) {
+      requestPayload = await req.json();
+    } else if (contentType.includes("multipart/form-data")) {
+      const formData = await req.formData();
+      formData.forEach((value, key) => {
+        requestPayload[key] = value;
+      });
+    } else {
       return NextResponse.json(
-        { message: "All feilds are required" },
+        { status: "error", message: "Unsupported Content-Type" },
+        { status: 415 }
+      );
+    }
+
+    const resumeUrl =
+      typeof requestPayload.resumeurl === "string"
+        ? requestPayload.resumeurl.trim()
+        : "";
+    const jobDescription =
+      typeof requestPayload.JobDescription === "string"
+        ? requestPayload.JobDescription.trim()
+        : "";
+    const jobRole =
+      typeof requestPayload.JobRole === "string"
+        ? requestPayload.JobRole.trim()
+        : "";
+    const yearsInput = requestPayload.yearsOfExperience;
+    const yearsOfExperience =
+      typeof yearsInput === "number"
+        ? yearsInput
+        : typeof yearsInput === "string"
+        ? Number(yearsInput)
+        : NaN;
+
+    let resumeFileName =
+      typeof requestPayload.resumeFileName === "string" &&
+      requestPayload.resumeFileName.trim()
+        ? requestPayload.resumeFileName.trim()
+        : "";
+    let resumeBase64 =
+      typeof requestPayload.resumeFileBase64 === "string"
+        ? requestPayload.resumeFileBase64.trim()
+        : "";
+    const resumeFile =
+      requestPayload.resumeFile instanceof File
+        ? (requestPayload.resumeFile as File)
+        : null;
+
+    if (!resumeBase64 && resumeFile) {
+      resumeBase64 = await fileToDataUrl(resumeFile);
+      if (!resumeFileName && resumeFile.name) {
+        resumeFileName = resumeFile.name;
+      }
+      if (!requestPayload.resumeFileType) {
+        requestPayload.resumeFileType = resumeFile.type;
+      }
+    }
+
+    if (!resumeFileName) {
+      resumeFileName = "resume.pdf";
+    }
+
+    if (!resumeBase64) {
+      return NextResponse.json(
+        { status: "error", message: "A resume file is required" },
         { status: 400 }
       );
     }
 
-    // parse resume using layout-aware extractor
-    let resumeText = "";
-    let parsedResume: ParsedResume | null = null;
-    console.log("[Interview API] Resume file received:", !!resumeFile, resumeFile?.name, resumeFile?.size);
-    if (resumeFile) {
-      console.log("[Interview API] Resume file type:", typeof resumeFile, resumeFile.constructor.name);
-    }
-    try {
-      if (resumeFile) {
-        const buf = Buffer.from(await resumeFile.arrayBuffer());
-        console.log("[Interview API] Buffer created, size:", buf.length);
-        parsedResume = await parsePdfResume(buf);
-        
-        // If parsing returned scanned/failed result, log and set to null instead
-        if (parsedResume?.scanned) {
-          console.warn("[Interview API] PDF parsing failed or detected as scanned:", parsedResume.notes);
-          console.log("[Interview API] Continuing without resume context");
-          parsedResume = null;
-        } else {
-          // Debug: print parsed resume to server logs
-          console.log("[Interview API] Parsed resume:", JSON.stringify(parsedResume, null, 2));
-          resumeText = parsedResume.rawText || "";
-        }
-      } else {
-        console.log("[Interview API] No resume file provided");
+    const normalizedResumeDataUrl = ensureDataUrl(
+      resumeBase64,
+      typeof requestPayload.resumeFileType === "string"
+        ? requestPayload.resumeFileType
+        : undefined
+    );
+
+    let uploadedResumeUrl = resumeUrl;
+
+    if (!uploadedResumeUrl) {
+      try {
+        uploadedResumeUrl = await uploadResumeToImageKit(
+          resumeFileName,
+          normalizedResumeDataUrl
+        );
+      } catch (uploadError) {
+        console.error("[Interview API] Resume upload error:", uploadError);
+        return NextResponse.json(
+          { status: "error", message: "Failed to upload resume to ImageKit" },
+          { status: 502 }
+        );
       }
-    } catch (error) {
-      console.error("[Interview API] Error processing resume: ", error);
-      parsedResume = null;
     }
 
-    // Build a single structured context object including the parsed resume
-    const resumeForContext = parsedResume
-      ? {
-          scanned: parsedResume.scanned || false,
-          notes: parsedResume.notes || undefined,
-          // cap sections by configured limits
-          experience: (parsedResume.experience || []).slice(0, SECTION_LIMITS.experienceItems),
-          internships: (parsedResume.internships || []).slice(0, SECTION_LIMITS.experienceItems),
-          projects: (parsedResume.projects || []).slice(0, SECTION_LIMITS.projectItems),
-          skills: (parsedResume.skills || []).slice(0, SECTION_LIMITS.skillItems),
-          education: (parsedResume.education || []).slice(0, SECTION_LIMITS.educationItems),
-          confidence: parsedResume.confidence || undefined,
-          // rawText and otherSections omitted to keep size small
-        }
-      : undefined;
-
-    // Construct concise resume summary text
-    let resumeSummary = "";
-    if (parsedResume && !parsedResume.scanned) {
-      const parts: string[] = [];
-      if (resumeForContext?.experience?.length)
-        parts.push(`Experience: ${resumeForContext.experience.join(" | ")}`);
-      if (resumeForContext?.projects?.length)
-        parts.push(`Projects: ${resumeForContext.projects.join(" | ")}`);
-      if (resumeForContext?.skills?.length)
-        parts.push(`Skills: ${resumeForContext.skills.join(", ")}`);
-      if (resumeForContext?.education?.length)
-        parts.push(`Education: ${resumeForContext.education.join(" | ")}`);
-      resumeSummary = parts.join("\n");
-    } else if (parsedResume && parsedResume.scanned) {
-      resumeSummary = "PDF appears scanned or non-selectable; ignoring resume text.";
-    } else if (resumeText) {
-      resumeSummary = resumeText.slice(0, 2000);
+    if (!uploadedResumeUrl || !jobRole || !jobDescription) {
+      return NextResponse.json(
+        {
+          status: "error",
+          message: "resume, JobDescription, and JobRole are required",
+        },
+        { status: 400 }
+      );
     }
 
-    const contextObj: any = {
-      jobRole,
-      techStack,
-      yearsOfExperience,
-      resume: resumeForContext || null,
-      resumeSummary: resumeSummary || null,
+    if (Number.isNaN(yearsOfExperience) || yearsOfExperience < 0) {
+      return NextResponse.json(
+        { status: "error", message: "yearsOfExperience must be a valid non-negative number" },
+        { status: 400 }
+      );
+    }
+
+    const techStack = buildTechStack(jobDescription, jobRole);
+
+    const workflowBody = {
+      resumeurl: uploadedResumeUrl,
+      JobDescription: jobDescription,
+      JobRole: jobRole,
+      yearsOfExperience: yearsOfExperience.toString(),
     };
 
-    // Debug: print gathered context (object)
-    console.log("[Interview API] Context object:", JSON.stringify(contextObj, null, 2));
-    console.log("[Interview API] Resume included:", !!resumeForContext);
-    console.log("[Interview API] Resume summary length:", resumeSummary?.length || 0);
-    console.log("[Interview API] Combined context preview:", JSON.stringify({
-      jobRole,
-      techStack,
-      yearsOfExperience,
-      resume: resumeForContext ? "Resume data included" : undefined,
-      resumeSummary: resumeSummary ? "Resume summary included" : undefined,
-    }, null, 2));
-    console.log("[Interview API] Combined context string:", JSON.stringify(contextObj, null, 2));
-
-    // Stringify with size enforcement
-    let context = JSON.stringify(contextObj);
-    if (context.length > MAX_CONTEXT_CHARS) {
-      // If still too large, truncate resumeSummary proportionally
-      const baseObj = { ...contextObj, resumeSummary: undefined };
-      let baseStr = JSON.stringify(baseObj);
-      const remaining = Math.max(0, MAX_CONTEXT_CHARS - baseStr.length - 20);
-      const clippedSummary = (resumeSummary || "").slice(0, remaining);
-      context = JSON.stringify({ ...baseObj, resumeSummary: clippedSummary });
-    }
-
-    // Debug: print gathered context (final string)
-    console.log("[Interview API] Context length:", context.length);
-    console.log("[Interview API] Context string (truncated 2000 chars):", context.slice(0, 2000));
-    console.log("[Interview API] Sending combined context to Gemini API with resume data:", {
-      hasResume: !!resumeForContext,
-      hasResumeSummary: !!resumeSummary,
-      resumeItems: resumeForContext ? {
-        experience: (resumeForContext.experience || []).length,
-        projects: (resumeForContext.projects || []).length,
-        skills: (resumeForContext.skills || []).length,
-        education: (resumeForContext.education || []).length,
-        internships: (resumeForContext.internships || []).length,
-      } : null,
+    const workflowResponse = await fetch(WORKFLOW_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(workflowBody),
     });
 
-    let questions;
-    let usedFallBack = false;
-
-    try {
-      questions = await generateInterviewQuestions(context);
-    } catch (error: any) {
-      console.error(
-        "Failed to generate questions with gemini api, using fall back questions: ",
-        error
+    if (!workflowResponse.ok) {
+      const errorText = await workflowResponse.text();
+      console.error("[Interview API] Workflow error:", workflowResponse.status, errorText);
+      return NextResponse.json(
+        {
+          status: "error",
+          message: `Workflow request failed with status ${workflowResponse.status}`,
+        },
+        { status: 502 }
       );
-
-      // check if it's rate limit error
-      const isRateLimitError =
-        error.message &&
-        (error.message.includes("429") ||
-          error.message.includes("Too Many Requests") ||
-          error.message.includes("RATE_LIMIT_EXCEEDED"));
-
-      questions = getFallBackQuestions(jobRole, techStack);
-      usedFallBack = true;
     }
 
-    // create new interview session
+    const workflowPayload = await workflowResponse.json().catch((err) => {
+      console.error("[Interview API] Failed to parse workflow response:", err);
+      throw new Error("Invalid workflow response format");
+    });
+
+    const workflowQuestions = extractQuestions(workflowPayload);
+
+    if (!workflowQuestions.length) {
+      return NextResponse.json(
+        {
+          status: "error",
+          message: "Workflow response did not contain a valid questions array",
+        },
+        { status: 502 }
+      );
+    }
+
+    const topQuestions = workflowQuestions
+      .filter((question) => typeof question === "string" && question.trim())
+      .slice(0, 15)
+      .map((question) => question.trim());
+
+    if (!topQuestions.length) {
+      return NextResponse.json(
+        {
+          status: "error",
+          message: "No valid questions were returned from the workflow",
+        },
+        { status: 502 }
+      );
+    }
+
     const newInterview = new Interview({
       user: userId,
       jobRole,
       techStack,
       yearsOfExperience,
-      resumeText,
-      questions: questions.map((question) => ({
+      resumeText: "",
+      resumeUrl: uploadedResumeUrl,
+      questions: topQuestions.map((question) => ({
         text: question,
         answer: "",
         analysis: null,
       })),
+      workflowQuestions: workflowPayload,
       status: "in-progress",
-      usedFallbackQuestions: usedFallBack,
+      usedFallbackQuestions: false,
     });
 
     await newInterview.save();
 
     return NextResponse.json(
       {
-        message: usedFallBack
-          ? "interview created with default questions due to AI service limitation. Try again later for personalized questions."
-          : "interview created successfully",
+        status: "success",
+        resumeurl: uploadedResumeUrl,
+        questions: topQuestions,
+        Top15Questions: topQuestions,
         interview: newInterview,
-        // Dev-only debug payload to surface gathered context in browser console
-        debug:
-          process.env.NODE_ENV !== "production"
-            ? {
-                contextObject: contextObj,
-                contextStringPreview: context.slice(0, 2000),
-              }
-            : undefined,
       },
       { status: 201 }
     );
   } catch (error: any) {
     console.error("Error creating interview: ", error);
-
-    //provide more specific errors
-    let errorMessage = "Internal server error";
-    let statusCode = 500;
-
-    if (
-      (error.message && error.message.includes("rate limit")) ||
-      (error.message && error.message.includes("429")) ||
-      (error.message && error.message.includes("Too Many Requests"))
-    ) {
-      errorMessage =
-        "AI service is currently busy. Please try again in few minutes.";
-      statusCode = 429;
-    } else if (
-      error.message &&
-      error.message.includes("failed to generate interview questions")
-    ) {
-      errorMessage =
-        "Unable to generate interview questions. Please try again later.";
-    }
-
-    return NextResponse.json({ message: errorMessage }, { status: statusCode });
+    const errorMessage =
+      typeof error?.message === "string"
+        ? error.message
+        : "Internal server error";
+    return NextResponse.json(
+      { status: "error", message: errorMessage },
+      { status: error.statusCode || 500 }
+    );
   }
 }
+

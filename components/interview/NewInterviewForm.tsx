@@ -8,10 +8,27 @@ interface NewInterviewFormProps {
   onStartInterview: (interviewData: any) => void;
 }
 
+const resumeFolder = process.env.NEXT_PUBLIC_IMAGEKIT_FOLDER || "";
+
 const NewInterviewForm = ({
   onClose,
   onStartInterview,
 }: NewInterviewFormProps) => {
+  const fileToDataUrl = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          resolve(reader.result);
+        } else {
+          reject(new Error("Failed to read file"));
+        }
+      };
+      reader.onerror = () => reject(reader.error || new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
+  };
+
   const [jobRole, setJobRole] = useState("");
   const [techStack, setTechStack] = useState("");
   const [yearsOfExperience, setYearsOfExperience] = useState<number>(0);
@@ -39,30 +56,33 @@ const NewInterviewForm = ({
       return;
     }
 
+    if (!resumeFile) {
+      setFileError("Please upload your resume (PDF)");
+      return;
+    }
+
     setIsSubmitting(true);
 
-    const formData = new FormData();
-    formData.append("jobRole", jobRole);
-    formData.append("techStack", JSON.stringify(techStack));
-    formData.append("yearsOfExperience", yearsOfExperience.toString());
+    let resumeFileBase64 = "";
 
-    // Debug: log resume file before sending
-    // eslint-disable-next-line no-console
-    console.log("[Client] Resume file before sending:", {
-      hasFile: !!resumeFile,
-      fileName: resumeFile?.name,
-      fileSize: resumeFile?.size,
-      fileType: resumeFile?.type,
-    });
-
-    if (resumeFile) {
-      formData.append("resume", resumeFile);
-      // eslint-disable-next-line no-console
-      console.log("[Client] Resume added to FormData");
-    } else {
-      // eslint-disable-next-line no-console
-      console.log("[Client] No resume file to upload");
+    try {
+      resumeFileBase64 = await fileToDataUrl(resumeFile);
+    } catch (conversionError) {
+      console.error("Failed to read resume file", conversionError);
+      setIsSubmitting(false);
+      setFileError("Could not read resume file. Please try again.");
+      return;
     }
+
+    const workflowPayload = {
+      resumeFileBase64,
+      resumeFileName: resumeFile.name,
+      resumeFileType: resumeFile.type,
+      resumeFolder: resumeFolder || undefined,
+      JobDescription: techStack || "Remote",
+      JobRole: jobRole || "Software Developer",
+      yearsOfExperience: String(yearsOfExperience || "1"),
+    };
 
     try {
       //get token from local storage
@@ -75,9 +95,10 @@ const NewInterviewForm = ({
       const response = await fetch("/api/interview", {
         method: "POST",
         headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: formData,
+        body: JSON.stringify(workflowPayload),
       });
 
       // Check if response is JSON before parsing
@@ -142,9 +163,9 @@ const NewInterviewForm = ({
             onChange={(e) => setJobRole(e.target.value)}
           />
 
-          {/* tech stack */}
+          {/* job description / tech stack */}
           <InterviwFormInputs
-            label="Enter Resume Details"
+            label="Job Description / Tech Stack"
             type="text"
             placeholder="Mention your Skills, Projects and Experience"
             value={techStack}
@@ -164,7 +185,7 @@ const NewInterviewForm = ({
 
           {/* resume upload */}
           <div className="flex flex-col w-[100%]">
-            <label className="mb-2 text-sm">Upload Resume (Optional) </label>
+            <label className="mb-2 text-sm">Upload Resume</label>
             <input
               className="border py-2 cursor-pointer rounded-lg px-4 border-zinc-700 w-[100%]"
               type="file"
