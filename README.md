@@ -1,6 +1,6 @@
 # 🎙️ AI Powered Agentic Interview
 
-InterviewAI is a smart, full-stack mock interview platform designed to simulate real-life technical interviews. Leveraging Agentic AI, it generates role-specific questions, analyzes user responses, scores performance, and offers personalized feedback — all in one seamless experience with 2 agents and 2 sub-agents.
+This is a smart, full-stack agentic ai interview platform designed to simulate real-life technical interviews. Leveraging Agentic AI, it generates role-specific questions, analyzes user responses, scores performance, and offers personalized feedback. All in one seamless experience with 2 agents and 2 sub-agents.
 ---
 
 ## 🚀 Features
