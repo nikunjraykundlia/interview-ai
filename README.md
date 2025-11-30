@@ -1,6 +1,6 @@
-# 🎙️ InterviewAI — AI-Powered Mock Interview Platform
+# 🎙️ AI Powered Agentic Interview
 
-InterviewAI is a smart, full-stack mock interview platform designed to simulate real-life technical interviews. Leveraging AI, it generates role-specific questions, analyzes user responses, scores performance, and offers personalized feedback — all in one seamless experience.
+InterviewAI is a smart, full-stack mock interview platform designed to simulate real-life technical interviews. Leveraging Agentic AI, it generates role-specific questions, analyzes user responses, scores performance, and offers personalized feedback — all in one seamless experience with 2 agents and 2 sub-agents.
 ---
 
 ## 🚀 Features
@@ -57,7 +57,6 @@ InterviewAI is a smart, full-stack mock interview platform designed to simulate 
 
 - Node.js 18.18+ (20+ recommended)
 - MongoDB (local service or MongoDB Atlas)
-- Google Generative AI Key (Gemini)
 
 ## 🔐 Environment Variables
 
@@ -155,7 +154,7 @@ public/                  # Static assets (images, logo)
 
 - **Question Generation**: AI-powered interview questions via n8n agentic workflows
 - **Response Analysis**: Real-time analysis of individual Q&A pairs via n8n analyzer webhook
-- **Interview Feedback**: Comprehensive feedback generation via n8n feedback webhook with Gemini fallback
+- **Interview Feedback**: Comprehensive feedback generation via n8n feedback webhook
 
 ### n8n Agentic Workflow Integration
 
