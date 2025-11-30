@@ -149,15 +149,9 @@ export default function InterviewList() {
                 {getStatusBadge(interview.status)}
               </div>
 
-              {/* // experience, resume details, progress and score */}
+              {/* // experience, progress and score */}
               <div className="flex flex-col gap-2 mb-4 font-medium text-gray-400 text-md">
-                <p>Resume Details</p>
-                <p className="text-gray-200">
-                  {Array.isArray(interview.techStack)
-                    ? interview.techStack.join(" ")
-                    : String(interview.techStack || "")}
-                </p>
-                <div className="flex gap-20 mt-5 max-sm:gap-10">
+                <div className="flex gap-20 max-sm:gap-10">
                   <div className="">
                     <p>Experience</p>
                     <p className="text-gray-200">

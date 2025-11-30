@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Interview from "@/models/Interview";
 import { getUserIdFromToken } from "@/lib/auth";
+import { getInterviewFeedbackFromN8n } from "@/lib/n8nInterviewFeedback";
 import { generateInterviewFeedback } from "@/lib/gemini";
 
 export async function POST(
@@ -9,7 +10,6 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    // const { id } = params;
     await connectDB();
 
     // get token from authorization header
@@ -23,7 +23,7 @@ export async function POST(
     }
 
     // get user id from token
-    const userId = getUserIdFromToken(token);
+    const userId = await getUserIdFromToken(token);
 
     // get interview id from params
     const interviewId = params.id;
@@ -77,9 +77,72 @@ export async function POST(
       `Generating feedback for interview with overall score: ${overallScore}`
     );
 
-    // generate overall feedback using gemini
-    const feedback = await generateInterviewFeedback(interview);
-    console.log("Feedback generated successfully");
+    // Prepare Q&A pairs for n8n webhook
+    const qas = interview.questions.map((q: any) => ({
+      question: q.text || "",
+      answer: q.answer || "",
+    }));
+
+    // Prepare resume object (can be null or object with url)
+    const resume = interview.resumeUrl
+      ? { url: interview.resumeUrl }
+      : interview.resumeText
+      ? { text: interview.resumeText }
+      : null;
+
+    // Extract job description from workflowQuestions if available
+    const jobDescription = 
+      interview.workflowQuestions && 
+      typeof interview.workflowQuestions === 'object' && 
+      'JobDescription' in interview.workflowQuestions
+        ? String(interview.workflowQuestions.JobDescription || '')
+        : null;
+
+    // Call n8n webhook to get interview feedback
+    console.log("Calling n8n interview feedback webhook...");
+    const n8nResult = await getInterviewFeedbackFromN8n({
+      candidateId: userId,
+      sessionId: interviewId,
+      JobRole: interview.jobRole,
+      yearsOfExperience: interview.yearsOfExperience,
+      jobDescription: jobDescription ?? undefined,
+      resume: resume,
+      qas: qas,
+      timestamp: new Date().toISOString(),
+    });
+
+    let feedback;
+
+    if (n8nResult.status === "success" && n8nResult.analysis) {
+      // Use n8n feedback if successful
+      feedback = {
+        overallFeedback: n8nResult.analysis.overallFeedback || "",
+        strengths: n8nResult.analysis.strengths || [],
+        areasForImprovement: n8nResult.analysis.areasForImprovement || [],
+        nextSteps: n8nResult.analysis.nextSteps || [],
+      };
+      console.log("Feedback received from n8n webhook successfully");
+    } else {
+      // Fallback to Gemini if n8n fails
+      console.warn(
+        "n8n webhook failed, falling back to Gemini:",
+        n8nResult.error?.message || "Unknown error"
+      );
+      try {
+        feedback = await generateInterviewFeedback(interview);
+        console.log("Feedback generated using Gemini fallback");
+      } catch (geminiError) {
+        console.error("Gemini fallback also failed:", geminiError);
+        // Use empty feedback structure if both fail
+        feedback = {
+          overallFeedback:
+            "Feedback generation failed. Please try again later.",
+          strengths: [],
+          areasForImprovement: [],
+          nextSteps: [],
+        };
+      }
+    }
 
     // update the interview with the overall score and feedback
     interview.overallScore = overallScore;
@@ -88,7 +151,7 @@ export async function POST(
     interview.completedAt = new Date();
 
     await interview.save();
-    console.log("interview marked as completed");
+    console.log("Interview marked as completed and feedback saved to MongoDB");
 
     // get the updated interview
     const updatedInterview = await Interview.findById(interviewId);
@@ -106,11 +169,13 @@ export async function POST(
         success: true,
         interviewId: updatedInterview._id,
         status: "completed",
+        feedback: updatedInterview.feedback,
         redirectUrl: `/interview/${updatedInterview._id}/results`,
       },
       { status: 200 }
     );
   } catch (error) {
+    console.error("Error completing interview:", error);
     return NextResponse.json(
       { message: "Internal server error", error: String(error) },
       { status: 500 }

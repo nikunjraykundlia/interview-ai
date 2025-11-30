@@ -38,10 +38,10 @@ const Hero = () => {
       </div>
       <div className="flex flex-col gap-6 items-center -mt-16 text-[var(--nav-text)]">
         <h1 className="font-semibold max-sm:text-[40px] text-7xl text-center">
-          AI Powered Mock Interview
+          AI Powered Agentic Interview
         </h1>
         <p className="text-xl text-center">
-          AI-powered feedback to help you ace every interview with confidence.
+          Agentic AI's that analyzes, advises, and accelerates with unmatched convenience
         </p>
 
         <Link href={"/dashboard"}>

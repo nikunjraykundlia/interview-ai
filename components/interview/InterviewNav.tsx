@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Clock, Lock, Timer } from "lucide-react";
+import { ArrowLeft, Timer } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -38,30 +38,6 @@ const InterviewNav = ({ interview }: { interview: any }) => {
               Back to Dashboard
             </span>
           </Link>
-        </div>
-      </div>
-      <div className="flex flex-col items-start justify-between gap-2 px-10 py-3 border-b bg-slate-900/30 max-sm:p-4 sm:flex-row sm:items-center border-slate-800/50">
-        <div className="flex items-center gap-2 max-sm:text-[10px] text-sm text-slate-300">
-          <span className="font-medium text-[rgb(184,122,156)] bg-[#b87a9c]/10 px-2 py-1 rounded-md flex items-center gap-1">
-            <Lock className="w-3 h-3" />
-            Resume Details:
-          </span>
-          <div className="flex gap-2">
-            <span className="bg-slate-800/70 px-2 py-1 max-sm:text-[8px] rounded-md text-xs border border-slate-700/50 hover:border-[#b87a9c]/30 transition-all cursor-default">
-              {Array.isArray(interview.techStack) ? interview.techStack.join(" ") : String(interview.techStack || "")}
-            </span>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 px-3 py-1 text-sm border rounded-md max-sm:text-xs bg-slate-800/70 border-slate-700/50">
-          <Clock className="h-4 w-4 text-[#b87a9c]" />
-
-          <p className="text-slate-300">
-            Experience:{" "}
-            <span className="font-medium text-white">
-              {interview.yearsOfExperience}{" "}
-              {interview.yearsOfExperience <= 1 ? "Year" : "Years"}
-            </span>
-          </p>
         </div>
       </div>
     </>

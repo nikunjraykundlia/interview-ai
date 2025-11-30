@@ -165,9 +165,9 @@ const NewInterviewForm = ({
 
           {/* job description / tech stack */}
           <InterviwFormInputs
-            label="Job Description / Tech Stack"
+            label="Job Description"
             type="text"
-            placeholder="Mention your Skills, Projects and Experience"
+            placeholder="Mention the Skills and Experience Required"
             value={techStack}
             onChange={(e) => setTechStack(e.target.value)}
             inputClassName="py-4"

@@ -310,6 +310,12 @@ export async function POST(req: Request) {
       throw new Error("Invalid workflow response format");
     });
 
+    // Ensure the original JobDescription is preserved in workflowQuestions
+    const workflowPayloadWithJobDescription = {
+      ...workflowPayload,
+      JobDescription: jobDescription,
+    };
+
     const workflowQuestions = extractQuestions(workflowPayload);
 
     if (!workflowQuestions.length) {
@@ -349,7 +355,7 @@ export async function POST(req: Request) {
         answer: "",
         analysis: null,
       })),
-      workflowQuestions: workflowPayload,
+      workflowQuestions: workflowPayloadWithJobDescription,
       status: "in-progress",
       usedFallbackQuestions: false,
     });

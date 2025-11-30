@@ -1,13 +1,22 @@
 import React from "react";
 
 const FeedbackTabData = ({ interview }: { interview: any }) => {
+  if (!interview.feedback) {
+    return (
+      <div className="p-6 bg-gradient-to-r from-[#b87a9c]/20 to-[#d8a1bc]/10 rounded-xl backdrop-blur-sm border border-[#b87a9c]/30 shadow-lg overflow-hidden">
+        <h2 className="mb-4 text-xl font-bold">Detailed Feedback</h2>
+        <p className="text-gray-300">Feedback is being generated. Please refresh the page.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 bg-gradient-to-r from-[#b87a9c]/20 to-[#d8a1bc]/10 rounded-xl backdrop-blur-sm border border-[#b87a9c]/30 shadow-lg overflow-hidden">
       <h2 className="mb-4 text-xl font-bold">Detailed Feedback</h2>
 
       <div className="mb-6">
         <h3 className="mb-2 text-lg font-semibold">Overall Assasement</h3>
-        <p className="text-gray-300">{interview.feedback.overallFeedback}</p>
+        <p className="text-gray-300">{interview.feedback.overallFeedback || "No feedback available"}</p>
       </div>
 
       <div>
@@ -15,7 +24,7 @@ const FeedbackTabData = ({ interview }: { interview: any }) => {
           Improvement Goals
         </h3>
         <ul className="pl-5 space-y-2 list-disc">
-          {interview.feedback.nextSteps.map((step: string, index: number) => (
+          {(interview.feedback.nextSteps || []).map((step: string, index: number) => (
             <li key={index} className="text-gray-300">
               {step}
             </li>
@@ -42,13 +51,13 @@ const FeedbackTabData = ({ interview }: { interview: any }) => {
                 <div>
                   <h5 className="text-gray-400">Technical Feedback:</h5>
                   <p className="text-sm">
-                    {question.analysis.technicalFeedback}
+                    {question.analysis?.technicalFeedback || "No technical feedback available"}
                   </p>
                 </div>
                 <div>
                   <h5 className="text-gray-400">Communication Feedback:</h5>
                   <p className="text-sm">
-                    {question.analysis.communicationFeedback}
+                    {question.analysis?.communicationFeedback || "No communication feedback available"}
                   </p>
                 </div>
               </div>
