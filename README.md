@@ -171,13 +171,6 @@ The platform integrates with three n8n agentic workflows for enhanced AI capabil
 - **Purpose**: Analyzes individual question-answer pairs in real-time
 - **Location**: `lib/n8nAnalyzer.ts`
 - **Usage**: Called asynchronously when answers are submitted (non-blocking)
-- **Payload**: 
-  ```json
-  {
-    "question": "string",
-    "answer": "string"
-  }
-  ```
 - **Response**:
   ```json
   {
@@ -196,23 +189,6 @@ The platform integrates with three n8n agentic workflows for enhanced AI capabil
 #### 3. Interview Feedback Workflow
 - **Purpose**: Generates comprehensive overall interview feedback after completion
 - **Location**: `lib/n8nInterviewFeedback.ts`
-- **Payload**: 
-  ```json
-  {
-    "JobRole": "string",
-    "yearsOfExperience": "string|number",
-    "jobDescription": "string",
-    "resume": "object|null",
-    "questions": [{"question": "string", "answer": "string"}],
-    "question1": "string", ... "question15": "string",
-    "answer1": "string", ... "answer15": "string",
-    "question": "string",  // Last question (fallback)
-    "answer": "string",     // Last answer (fallback)
-    "candidateId": "string",
-    "sessionId": "string",
-    "timestamp": "string"
-  }
-  ```
 - **Response**:
   ```json
   {
@@ -245,15 +221,6 @@ The platform integrates with three n8n agentic workflows for enhanced AI capabil
 3. **Interview Feedback**: Triggered when completing an interview (`POST /api/interview/[id]/complete`)
    - Sends all Q&A pairs along with interview metadata
    - Generates overall feedback, strengths, areas for improvement, and next steps
-   - Automatically falls back to Gemini if n8n fails
-
-## 🔒 Security & Authentication
-
-- JWT-based authentication
-- Tokens stored in `localStorage` as `auth_token`
-- Bearer token authentication for API requests
-- User ownership verification for all interview operations
-- Secure password hashing with bcrypt
 
 ## 📊 Database Schema
 
