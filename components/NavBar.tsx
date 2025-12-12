@@ -55,7 +55,7 @@ const NavBar = () => {
           <UserProfile />
         ) : (
           <Link href="/login">
-            <Button name="Let's Talk" />
+            <Button name="Start Now" />
           </Link>
         )}
       </div>
