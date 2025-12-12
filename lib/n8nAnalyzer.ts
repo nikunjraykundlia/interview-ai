@@ -7,7 +7,7 @@
  */
 
 const ANALYZER_WEBHOOK_URL =
-  "https://goartificialnow.app.n8n.cloud/webhook/analyse-q&a";
+  "https://exercisepassion.app.n8n.cloud/webhook/analyse-q&a";
 const TIMEOUT_MS = 20000; // 20 seconds
 
 /**

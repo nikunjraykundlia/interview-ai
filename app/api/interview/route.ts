@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 
 const WORKFLOW_ENDPOINT =
   process.env.N8N_WORKFLOW_URL ??
-  "https://goartificialnow.app.n8n.cloud/webhook/generate-interview-question";
+  "https://exercisepassion.app.n8n.cloud/webhook/generate-interview-question";
 
 const IMAGEKIT_UPLOAD_URL =
   process.env.IMAGEKIT_UPLOAD_URL ??

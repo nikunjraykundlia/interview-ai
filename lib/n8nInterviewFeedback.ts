@@ -6,7 +6,7 @@
  */
 
 const INTERVIEW_FEEDBACK_WEBHOOK_URL =
-  "https://goartificialnow.app.n8n.cloud/webhook/interview-feedback";
+  "https://exercisepassion.app.n8n.cloud/webhook/interview-feedback";
 const TIMEOUT_MS = 30000; // 30 seconds
 const MAX_RETRIES = 1;
 const RETRY_DELAY_MS = 2000; // 2 seconds
