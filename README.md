@@ -78,7 +78,6 @@ IMAGEKIT_FOLDER=your_imagekit_folder
 
 Notes:
 - `MONGODB_URI` can be local (e.g., `mongodb://127.0.0.1:27017`) or Atlas.
-- `JWT_SECRET` can be any strong random string.
 
 ## ▶️ Run locally
 
@@ -96,64 +95,8 @@ npm run dev
 - `npm run build` — production build
 - `npm start` — start production server
 
-## 📁 Project structure (high level)
-
-```
-app/
-  api/                    # Next.js API routes
-    auth/                 # Authentication endpoints
-      check/              # Token validation
-      login/              # User login
-      logout/             # User logout
-      signup/             # User registration
-    interview/            # Interview API endpoints
-      [id]/               # Interview-specific operations
-        route.ts          # GET, POST, DELETE interview
-        answer/           # Answer submission with n8n analyzer
-        complete/         # Interview completion with n8n feedback
-      route.ts            # POST - Create new interview
-      user/               # GET - Get user's interviews
-    upload-resume/        # POST - PDF resume upload & parsing
-  interview/              # Interview pages
-    [id]/                 # Interview session pages
-      page.tsx            # Main interview session
-      analysis/           # Question-by-question analysis page
-      results/            # Results page (Overview & Feedback tabs)
-    new/                  # Create new interview form
-    page.tsx              # Interview list page
-  dashboard/             # User dashboard
-  login/, signup/        # Authentication pages
-  about/                 # About page
-components/
-  AnalysisPage/          # Question analysis components
-  auth-components/       # Login/signup form components
-  interview/             # Interview session components
-  interviewSession/     # Interview recording & voice input
-  ResultsPage/           # Results display components
-  small-components/      # Reusable UI components
-  errors/                # Error handling components
-mentor/                  # Mentor dashboard and feedback
-  page.tsx              # Main mentor dashboard
-  reviews/              # Review-related components
-    stream/             # Real-time review streaming
-lib/
-  mongodb.ts             # MongoDB connection
-  auth.ts                # JWT authentication utilities
-  gemini.ts              # Gemini AI fallback integration
-  n8nAnalyzer.ts         # n8n Q&A analyzer webhook
-  n8nInterviewFeedback.ts # n8n interview feedback webhook
-  parseResume.ts         # PDF resume parsing logic
-  pdfExtractor.ts        # PDF text extraction utilities
-  resumeConfig.ts        # Resume upload configuration
-models/
-  User.ts                # User MongoDB schema
-  Interview.ts           # Interview MongoDB schema
-public/                  # Static assets (images, logo)
-```
-
 ## 🔐 Auth & Data
 
-- JWT-based auth; token stored in `localStorage` as `auth_token`.
 - MongoDB connection configured in `lib/mongodb.ts` (db name: `interview-ai`).
 
 ## 🤖 AI Features
@@ -204,45 +147,91 @@ The platform integrates with three n8n agentic workflows for enhanced AI capabil
     "nextSteps": ["string"]
   }
   ```
-- **Features**:
-  - Retry logic (1 retry with 2-second delay)
-  - 30-second timeout
-  - Automatic fallback to Gemini if n8n fails
-  - Supports multiple payload formats (primary, legacy, fallback)
-  - Correlation ID tracking for debugging
-  - Handles nested response structures (data, body, output, response)
+
+#### 4. Mentor Agent Review Workflow
+- **Purpose**: Provides detailed critique of interviewer performance and question quality
+- **Location**: `app/api/interview/[id]/mentor`
+- **Response**:
+  ```json
+  {
+  "overallCritique": "string",
+  "questionQualityIssues": "string",
+  "missedOpportunities": "string",
+  "recommendedImprovedQuestions": "string",
+  "actionableAdviceForInterviewerAgent": "string"
+  }
+  ```
 
 ### Workflow Trigger Points
 
 1. **Question Generation**: Triggered when creating a new interview (`POST /api/interview`)
    - Sends job role, years of experience, job description, tech stack, and resume data
-   - Returns array of 15 interview questions
+   - Returns array of interview questions
    - Falls back to Gemini if n8n fails
+   - Stores questions in `workflowQuestions` field if using n8n, otherwise generates locally
 
 2. **Answer Analysis**: Triggered asynchronously when submitting an answer (`POST /api/interview/[id]/answer`)
    - Non-blocking: answer is saved immediately, analysis happens in background
    - Updates interview document when analysis completes
    - Analysis page polls every 1.5 seconds for updates
+   - Stores analysis results in `questions[].analysis` object
 
 3. **Interview Feedback**: Triggered when completing an interview (`POST /api/interview/[id]/complete`)
    - Sends all Q&A pairs along with interview metadata
-   - Generates overall feedback, strengths, areas for improvement, and next steps
+   - Generates comprehensive feedback via n8n feedback webhook
+   - Stores feedback in `feedback` object with overallFeedback, strengths, areasForImprovement, nextSteps
+   - Sets interview status to "completed" and updates completedAt timestamp
+
+4. **Mentor Agent Review**: Triggered when requesting mentor feedback (`POST /api/interview/[id]/mentor`)
+   - Sends completed interview data for mentor analysis
+   - Generates detailed critique of question quality and interviewer performance
+   - Stores review in `mentorAgentReviews` array with comprehensive feedback fields
+   - Provides actionable advice for improving future interview sessions
 
 ## 📊 Database Schema
 
-### Interview Model
-- User reference (ObjectId)
-- Job role, tech stack, years of experience
-- Resume text/URL
-- Questions array with answers and analysis
-- Overall score and feedback
-- Status (pending, in-progress, completed)
-- Timestamps (createdAt, completedAt)
-
 ### User Model
-- Email, password (hashed)
-- User profile information
-- Timestamps
+- **name** (String, required)
+- **email** (String, required, unique)
+- **password** (String, required, minLength: 8)
+- **createdAt** (Date, auto)
+- **updatedAt** (Date, auto)
+
+### Interview Model
+- **user** (ObjectId, ref: 'User', required)
+- **jobRole** (String, required)
+- **techStack** ([String], required)
+- **yearsOfExperience** (Number, required)
+- **resumeText** (String, default: "")
+- **resumeUrl** (String, default: "")
+- **questions** (Array of Question objects)
+  - **text** (String, required)
+  - **answer** (String, default: "")
+  - **analysis** (Object)
+    - **score** (Number, default: 0)
+    - **technicalFeedback** (String)
+    - **communicationFeedback** (String)
+    - **improvementSuggestions** ([String])
+- **workflowQuestions** (Mixed, default: null)
+- **overallScore** (Number, default: 0)
+- **feedback** (Object)
+  - **overallFeedback** (String)
+  - **strengths** ([String])
+  - **areasForImprovement** ([String])
+  - **nextSteps** ([String])
+- **status** (String, enum: ["pending", "in-progress", "completed"], default: "pending")
+- **completedAt** (Date, default: null)
+- **result** (String, default: null)
+- **mentorAgentReviews** (Array of Review objects)
+  - **overallCritique** (String)
+  - **questionQualityIssues** (String)
+  - **missedOpportunities** (String)
+  - **recommendedImprovedQuestions** (String)
+  - **actionableAdviceForInterviewerAgent** (String)
+  - **createdAt** (Date, default: now)
+- **usedFallbackQuestions** (Boolean, default: false)
+- **createdAt** (Date, auto)
+- **updatedAt** (Date, auto)
 
 ## 🚀 Development Notes
 
