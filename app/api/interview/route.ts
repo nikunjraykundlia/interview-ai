@@ -101,6 +101,40 @@ const extractQuestions = (payload: any): string[] => {
   return [];
 };
 
+const fetchLatestMentorFeedback = async (userId: string): Promise<any> => {
+  try {
+    const interviews = await Interview.find({
+      user: userId,
+      mentorAgentReviews: { $exists: true, $ne: [] }
+    })
+    .select('jobRole mentorAgentReviews createdAt completedAt')
+    .sort({ createdAt: -1 })
+    .limit(1);
+
+    if (interviews.length === 0) {
+      return null;
+    }
+
+    const latestInterview = interviews[0];
+    const latestReview = latestInterview.mentorAgentReviews[latestInterview.mentorAgentReviews.length - 1];
+
+    return {
+      interviewId: latestInterview._id,
+      jobRole: latestInterview.jobRole,
+      interviewDate: latestInterview.completedAt || latestInterview.createdAt,
+      reviewDate: latestReview.createdAt,
+      overallCritique: latestReview.overallCritique,
+      questionQualityIssues: latestReview.questionQualityIssues,
+      missedOpportunities: latestReview.missedOpportunities,
+      recommendedImprovedQuestions: latestReview.recommendedImprovedQuestions,
+      actionableAdviceForInterviewerAgent: latestReview.actionableAdviceForInterviewerAgent,
+    };
+  } catch (error) {
+    console.error("[Interview API] Error fetching mentor feedback:", error);
+    return null;
+  }
+};
+
 const ensureDataUrl = (base64: string, mimeType?: string): string => {
   const trimmed = base64.trim();
   if (trimmed.toLowerCase().startsWith("data:")) {
@@ -278,11 +312,15 @@ export async function POST(req: Request) {
 
     const techStack = buildTechStack(jobDescription, jobRole);
 
+    // Fetch latest mentor feedback for learning loop
+    const mentorFeedback = await fetchLatestMentorFeedback(userId);
+
     const workflowBody = {
       resumeurl: uploadedResumeUrl,
       JobDescription: jobDescription,
       JobRole: jobRole,
       yearsOfExperience: yearsOfExperience.toString(),
+      mentorFeedback: mentorFeedback,
     };
 
     const workflowResponse = await fetch(WORKFLOW_ENDPOINT, {

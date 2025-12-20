@@ -35,6 +35,9 @@ This is a smart, full-stack agentic ai interview platform designed to simulate r
 - 🎯 **Question Analysis Page**  
   Review individual question analysis with scores, technical feedback, and improvement suggestions.
 
+- 🎨 **Mentor Dashboard**  
+  A beautifully designed mentor interface with real-time feedback, performance metrics, and actionable insights.
+
 ---
 
 ## 🛠️ Tech Stack
@@ -48,9 +51,8 @@ This is a smart, full-stack agentic ai interview platform designed to simulate r
 | **Voice Input**| Web Speech API (Browser) |
 | **File Processing** | PDF.js (pdfjs-dist), pdf-parse |
 | **Storage**    | ImageKit (for resume uploads) |
-| **Authentication** | JWT (jsonwebtoken, jose) |
-| **UI Libraries** | Lucide React (icons), next-themes (theme support) |
-
+| **Authentication** | JWT (jsonwebtoken, jose) | 
+| **UI/UX** | Tailwind CSS, Lucide Icons, Glassmorphism Effects, next-themes (theme support) |
 ---
 
 ## 📦 Requirements
@@ -130,6 +132,10 @@ components/
   ResultsPage/           # Results display components
   small-components/      # Reusable UI components
   errors/                # Error handling components
+mentor/                  # Mentor dashboard and feedback
+  page.tsx              # Main mentor dashboard
+  reviews/              # Review-related components
+    stream/             # Real-time review streaming
 lib/
   mongodb.ts             # MongoDB connection
   auth.ts                # JWT authentication utilities
@@ -155,6 +161,7 @@ public/                  # Static assets (images, logo)
 - **Question Generation**: AI-powered interview questions via n8n agentic workflows
 - **Response Analysis**: Real-time analysis of individual Q&A pairs via n8n analyzer webhook
 - **Interview Feedback**: Comprehensive feedback generation via n8n feedback webhook
+- **Mentor Feedback System**: Real-time feedback and analysis with visual metrics and improvement suggestions.
 
 ### n8n Agentic Workflow Integration
 
@@ -246,3 +253,7 @@ The platform integrates with three n8n agentic workflows for enhanced AI capabil
 - Environment-based configuration
 - Error handling with fallback mechanisms
 - Async processing for non-blocking operations
+- Modern UI with glassmorphism and gradient effects
+- Responsive design for all device sizes
+- Real-time updates with Server-Sent Events (SSE)
+- Interactive UI components with smooth animations

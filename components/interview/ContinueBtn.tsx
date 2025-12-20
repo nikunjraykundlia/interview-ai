@@ -11,6 +11,7 @@ const colorClasses: Record<string, string> = {
   blue: "bg-blue-500 hover:bg-blue-600 text-white",
   green: "bg-green-500 hover:bg-green-600 text-white",
   zinc: "bg-zinc-100 hover:bg-zinc-300 text-black",
+  yellow: "bg-yellow-300 hover:bg-yellow-400 text-black",
 };
 
 const ContinueBtn = ({ onClick, text, path_1, path_2, color }: ContinueBtn) => {

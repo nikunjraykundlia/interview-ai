@@ -27,6 +27,18 @@ const feedbackSchema = new mongoose.Schema({
   nextSteps: [String],
 });
 
+const mentorAgentReviewSchema = new mongoose.Schema({
+  overallCritique: String,
+  questionQualityIssues: String,
+  missedOpportunities: String,
+  recommendedImprovedQuestions: String,
+  actionableAdviceForInterviewerAgent: String,
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const interviewSchema = new mongoose.Schema(
   {
     user: {
@@ -73,6 +85,11 @@ const interviewSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    result: {
+      type: String,
+      default: null,
+    },
+    mentorAgentReviews: [mentorAgentReviewSchema],
     usedFallbackQuestions: {
       type: Boolean,
       default: false,

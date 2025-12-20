@@ -18,14 +18,13 @@ const NavBar = () => {
           <Image width={60} height={60} src="/images/Logo.svg" alt="Logo" />
           {pathname !== "/" && pathname !== "/dashboard" && pathname !== "/login" && (
             <h2 className="text-2xl font-medium text-white sm:text-3xl">
-              interwise
             </h2>
           )}
         </Link>
       </div>
       <div className="max-lg:hidden">
         <ul className="flex font-[500] text-[var(--nav-text)] text-lg gap-18 items-center">
-          {["Home", "Dashboard"].map(
+          {["Home", "Dashboard", "Mentor"].map(
             (item, index) => {
               const link = item === "Home" ? "/" : `/${item.toLowerCase()}`;
 

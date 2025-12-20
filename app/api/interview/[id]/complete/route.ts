@@ -4,6 +4,7 @@ import Interview from "@/models/Interview";
 import { getUserIdFromToken } from "@/lib/auth";
 import { getInterviewFeedbackFromN8n } from "@/lib/n8nInterviewFeedback";
 import { generateInterviewFeedback } from "@/lib/gemini";
+import { sendToN8nMentor } from "@/lib/n8nmentoragent";
 
 export async function POST(
   req: Request,
@@ -149,9 +150,25 @@ export async function POST(
     interview.feedback = feedback;
     interview.status = "completed";
     interview.completedAt = new Date();
+    
+    // Set result based on overall score
+    interview.result = overallScore >= 70 ? "passed" : overallScore >= 50 ? "passed-with-notes" : "failed";
 
     await interview.save();
     console.log("Interview marked as completed and feedback saved to MongoDB");
+
+    // Send to n8n mentor webhook if result exists
+    try {
+      const mentorResult = await sendToN8nMentor(interview.toObject(), token);
+      if (mentorResult.sent) {
+        console.log("Successfully sent interview to n8n mentor webhook");
+      } else {
+        console.log("Did not send to n8n mentor:", mentorResult.reason);
+      }
+    } catch (mentorError) {
+      console.error("Error sending to n8n mentor webhook:", mentorError);
+      // Don't fail the request if mentor webhook fails
+    }
 
     // get the updated interview
     const updatedInterview = await Interview.findById(interviewId);
