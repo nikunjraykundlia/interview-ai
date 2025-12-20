@@ -44,7 +44,7 @@ const Dashboard = () => {
               Your Interviews
             </h1>
             <p className="text-gray-500 max-sm:text-sm">
-              Practice your interview skills with AI-powered feedback
+              Practice your Interview Skills with AI Agents
             </p>
           </div>
 
