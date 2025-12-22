@@ -286,6 +286,14 @@ export default function MentorPage() {
                     </div>
                     <p className="text-yellow-100 leading-relaxed whitespace-pre-wrap">{report.questionQualityIssues}</p>
                   </div>
+                  
+                  <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <Shield className="w-6 h-6 text-purple-400" />
+                      <h4 className="text-lg font-semibold text-white">Actionable Advice</h4>
+                    </div>
+                    <p className="text-purple-100 leading-relaxed whitespace-pre-wrap">{report.actionableAdviceForInterviewerAgent}</p>
+                  </div>
                 </div>
                 
                 <div className="space-y-6">
@@ -307,14 +315,7 @@ export default function MentorPage() {
                 </div>
               </div>
               
-              <div className="mt-6 bg-gradient-to-br from-purple-500/10 to-pink-500/10 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <Shield className="w-6 h-6 text-purple-400" />
-                  <h4 className="text-lg font-semibold text-white">Actionable Advice</h4>
-                </div>
-                <p className="text-purple-100 leading-relaxed whitespace-pre-wrap">{report.actionableAdviceForInterviewerAgent}</p>
-              </div>
-            </div>
+                          </div>
           </div>
         )}
       </div>
