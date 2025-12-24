@@ -90,6 +90,7 @@ const interviewSchema = new mongoose.Schema(
       default: null,
     },
     mentorAgentReviews: [mentorAgentReviewSchema],
+    mentorAgentReview: mentorAgentReviewSchema,
     usedFallbackQuestions: {
       type: Boolean,
       default: false,

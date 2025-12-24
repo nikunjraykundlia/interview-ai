@@ -45,53 +45,29 @@ export async function GET(req: Request) {
         // Initial data fetch
         const fetchInitialData = async () => {
           try {
-            const interviews = await Interview.find({
+            // Find the most recent interview with mentor review
+            const latestInterview = await Interview.findOne({
               user: userId,
-              mentorAgentReviews: { $exists: true, $ne: [] }
+              mentorAgentReview: { $exists: true }
             })
-            .select('jobRole completedAt mentorAgentReviews createdAt')
+            .select('jobRole completedAt mentorAgentReview createdAt')
             .sort({ createdAt: -1 });
 
-            // Aggregate all mentor feedback into a single comprehensive report
-            const allReviews = interviews.flatMap(interview => 
-              interview.mentorAgentReviews.map((review: MentorReviewData) => ({
-                interviewId: interview._id,
-                jobRole: interview.jobRole,
-                interviewDate: interview.completedAt || interview.createdAt,
-                reviewDate: review.createdAt,
-                overallCritique: review.overallCritique,
-                questionQualityIssues: review.questionQualityIssues,
-                missedOpportunities: review.missedOpportunities,
-                recommendedImprovedQuestions: review.recommendedImprovedQuestions,
-                actionableAdviceForInterviewerAgent: review.actionableAdviceForInterviewerAgent,
-              }))
-            );
+            // Get the mentor review from the most recent interview
+            const mentorReview = latestInterview ? latestInterview.mentorAgentReview : null;
 
-            // Sort by review date (newest first)
-            allReviews.sort((a, b) => new Date(b.reviewDate).getTime() - new Date(a.reviewDate).getTime());
-
-            // Create a single comprehensive report
-            const comprehensiveReport = allReviews.length > 0 ? {
-              lastUpdated: allReviews[0].reviewDate,
-              totalReviews: allReviews.length,
-              latestInterviewRole: allReviews[0].jobRole,
-              latestInterviewDate: allReviews[0].interviewDate,
-              // Aggregate all feedback into comprehensive sections
-              overallCritique: allReviews.map(review => 
-                `[${review.jobRole} - ${new Date(review.interviewDate).toLocaleDateString()}]\n${review.overallCritique}`
-              ).join('\n\n---\n\n'),
-              questionQualityIssues: allReviews.map(review => 
-                `[${review.jobRole} - ${new Date(review.interviewDate).toLocaleDateString()}]\n${review.questionQualityIssues}`
-              ).join('\n\n---\n\n'),
-              missedOpportunities: allReviews.map(review => 
-                `[${review.jobRole} - ${new Date(review.interviewDate).toLocaleDateString()}]\n${review.missedOpportunities}`
-              ).join('\n\n---\n\n'),
-              recommendedImprovedQuestions: allReviews.map(review => 
-                `[${review.jobRole} - ${new Date(review.interviewDate).toLocaleDateString()}]\n${review.recommendedImprovedQuestions}`
-              ).join('\n\n---\n\n'),
-              actionableAdviceForInterviewerAgent: allReviews.map(review => 
-                `[${review.jobRole} - ${new Date(review.interviewDate).toLocaleDateString()}]\n${review.actionableAdviceForInterviewerAgent}`
-              ).join('\n\n---\n\n'),
+            // Create a comprehensive report with the mentor review
+            const comprehensiveReport = mentorReview ? {
+              lastUpdated: mentorReview.createdAt,
+              totalReviews: 1,
+              latestInterviewRole: latestInterview.jobRole,
+              latestInterviewDate: latestInterview.completedAt || latestInterview.createdAt,
+              // Include the mentor review feedback
+              overallCritique: mentorReview.overallCritique,
+              questionQualityIssues: mentorReview.questionQualityIssues,
+              missedOpportunities: mentorReview.missedOpportunities,
+              recommendedImprovedQuestions: mentorReview.recommendedImprovedQuestions,
+              actionableAdviceForInterviewerAgent: mentorReview.actionableAdviceForInterviewerAgent,
             } : null;
 
             sendUpdate({
@@ -111,68 +87,39 @@ export async function GET(req: Request) {
         let lastCheck = new Date();
         const pollInterval = setInterval(async () => {
           try {
-            const interviews = await Interview.find({
+            // Find the most recent interview with mentor review
+            const latestInterview = await Interview.findOne({
               user: userId,
-              mentorAgentReviews: { $exists: true, $ne: [] },
+              mentorAgentReview: { $exists: true },
             })
-            .select('jobRole completedAt mentorAgentReviews createdAt updatedAt')
+            .select('jobRole completedAt mentorAgentReview createdAt updatedAt')
             .sort({ createdAt: -1 });
 
-            if (interviews.length > 0) {
-              // Aggregate all mentor feedback into a single comprehensive report
-              const allReviews = interviews.flatMap(interview => 
-                interview.mentorAgentReviews.map((review: MentorReviewData) => ({
-                  interviewId: interview._id,
-                  jobRole: interview.jobRole,
-                  interviewDate: interview.completedAt || interview.createdAt,
-                  reviewDate: review.createdAt,
-                  overallCritique: review.overallCritique,
-                  questionQualityIssues: review.questionQualityIssues,
-                  missedOpportunities: review.missedOpportunities,
-                  recommendedImprovedQuestions: review.recommendedImprovedQuestions,
-                  actionableAdviceForInterviewerAgent: review.actionableAdviceForInterviewerAgent,
-                }))
-              );
-
-              // Sort by review date (newest first)
-              allReviews.sort((a, b) => new Date(b.reviewDate).getTime() - new Date(a.reviewDate).getTime());
-
-              // Find reviews that are newer than lastCheck
-              const newReviews = allReviews.filter(review => 
-                new Date(review.reviewDate) > lastCheck
-              );
-
-              if (newReviews.length > 0) {
+            if (latestInterview && latestInterview.mentorAgentReview) {
+              const mentorReview = latestInterview.mentorAgentReview;
+              
+              // Check if the mentor review is newer than lastCheck
+              if (new Date(mentorReview.createdAt) > lastCheck) {
                 lastCheck = new Date();
                 
-                // Create the updated comprehensive report
+                // Create the updated comprehensive report with the mentor review
                 const comprehensiveReport = {
-                  lastUpdated: allReviews[0].reviewDate,
-                  totalReviews: allReviews.length,
-                  latestInterviewRole: allReviews[0].jobRole,
-                  latestInterviewDate: allReviews[0].interviewDate,
-                  // Aggregate all feedback into comprehensive sections
-                  overallCritique: allReviews.map(review => 
-                    `[${review.jobRole} - ${new Date(review.interviewDate).toLocaleDateString()}]\n${review.overallCritique}`
-                  ).join('\n\n---\n\n'),
-                  questionQualityIssues: allReviews.map(review => 
-                    `[${review.jobRole} - ${new Date(review.interviewDate).toLocaleDateString()}]\n${review.questionQualityIssues}`
-                  ).join('\n\n---\n\n'),
-                  missedOpportunities: allReviews.map(review => 
-                    `[${review.jobRole} - ${new Date(review.interviewDate).toLocaleDateString()}]\n${review.missedOpportunities}`
-                  ).join('\n\n---\n\n'),
-                  recommendedImprovedQuestions: allReviews.map(review => 
-                    `[${review.jobRole} - ${new Date(review.interviewDate).toLocaleDateString()}]\n${review.recommendedImprovedQuestions}`
-                  ).join('\n\n---\n\n'),
-                  actionableAdviceForInterviewerAgent: allReviews.map(review => 
-                    `[${review.jobRole} - ${new Date(review.interviewDate).toLocaleDateString()}]\n${review.actionableAdviceForInterviewerAgent}`
-                  ).join('\n\n---\n\n'),
+                  lastUpdated: mentorReview.createdAt,
+                  totalReviews: 1,
+                  latestInterviewRole: latestInterview.jobRole,
+                  latestInterviewDate: latestInterview.completedAt || latestInterview.createdAt,
+                  // Include the mentor review feedback
+                  overallCritique: mentorReview.overallCritique,
+                  questionQualityIssues: mentorReview.questionQualityIssues,
+                  missedOpportunities: mentorReview.missedOpportunities,
+                  recommendedImprovedQuestions: mentorReview.recommendedImprovedQuestions,
+                  actionableAdviceForInterviewerAgent: mentorReview.actionableAdviceForInterviewerAgent,
                 };
                 
                 sendUpdate({
                   type: 'report_updated',
                   report: comprehensiveReport,
-                  newReviewsCount: newReviews.length
+                  newReviewsCount: 1
                 });
               }
             }

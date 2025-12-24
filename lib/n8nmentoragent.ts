@@ -110,8 +110,8 @@ export async function sendToN8nMentor(interview: any, token?: string) {
           await Interview.findByIdAndUpdate(
             completeInterviewData._id,
             {
-              $push: {
-                mentorAgentReviews: {
+              $set: {
+                mentorAgentReview: {
                   overallCritique: mentorResponse.overallCritique || '',
                   questionQualityIssues: mentorResponse.questionQualityIssues || '',
                   missedOpportunities: mentorResponse.missedOpportunities || '',
@@ -122,7 +122,7 @@ export async function sendToN8nMentor(interview: any, token?: string) {
               }
             }
           );
-          console.log('Successfully stored mentor response in MongoDB');
+          console.log('Successfully stored latest mentor response in MongoDB (replacing previous)');
         }
       } catch (dbError) {
         console.error('Error storing mentor response in MongoDB:', dbError);
