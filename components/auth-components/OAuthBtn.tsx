@@ -20,7 +20,6 @@ const OAuthBtn = ({path, text, account}: {path: string, text:string, account: st
 
         <div className="flex w-[50vw] max-sm:w-full justify-center gap-4">
             <SocialBtn src="/images/google.svg" alt="google" name="Google"/>
-            <SocialBtn src="/images/facebook.svg" alt="facebook" name="Facebook"/>
           </div>
     </div>
   )
