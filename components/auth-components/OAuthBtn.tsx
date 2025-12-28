@@ -1,8 +1,36 @@
 import React from 'react'
 import SocialBtn from './SocialBtn'
 import Link from 'next/link'
+import { signInWithPopup } from 'firebase/auth'
+import { firebaseAuth, googleProvider } from '@/lib/firebaseClient'
+import { useAuth } from '@/context/AuthContext'
+import { useRouter } from 'next/navigation'
 
 const OAuthBtn = ({path, text, account}: {path: string, text:string, account: string}) => {
+  const { login } = useAuth();
+  const router = useRouter();
+
+  const handleGoogle = async () => {
+    const result = await signInWithPopup(firebaseAuth, googleProvider);
+    const idToken = await result.user.getIdToken();
+
+    const response = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ idToken }),
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.message || 'Google login failed');
+    }
+
+    login(data.token, data.user);
+    router.push('/dashboard');
+  };
+
   return (
     <div className='flex flex-col gap-6'>
       <div className="flex gap-3 items-center justify-center">
@@ -19,7 +47,7 @@ const OAuthBtn = ({path, text, account}: {path: string, text:string, account: st
         </div>
 
         <div className="flex w-[50vw] max-sm:w-full justify-center gap-4">
-            <SocialBtn src="/images/google.svg" alt="google" name="Google"/>
+            <SocialBtn src="/images/google.svg" alt="google" name="Google" onClick={handleGoogle}/>
           </div>
     </div>
   )
