@@ -51,7 +51,7 @@ This is a smart, full-stack agentic ai interview platform designed to simulate r
 | **Voice Input**| Web Speech API (Browser) |
 | **File Processing** | PDF.js (pdfjs-dist), pdf-parse |
 | **Storage**    | ImageKit (for resume uploads) |
-| **Authentication** | JWT (jsonwebtoken, jose) | 
+| **Authentication** | JWT (jsonwebtoken, jose) | Fi
 | **UI/UX** | Tailwind CSS, Lucide Icons, Glassmorphism Effects, next-themes (theme support) |
 ---
 

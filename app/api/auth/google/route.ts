@@ -6,7 +6,7 @@ import { SignJWT } from "jose";
 import bcrypt from "bcryptjs";
 import User from "@/models/User";
 import { connectDB } from "@/lib/mongodb";
-import { firebaseAdminAuth } from "@/lib/firebaseAdmin";
+import { getFirebaseAdminAuth } from "@/lib/firebaseAdmin";
 
 export async function POST(req: Request) {
   try {
@@ -17,6 +17,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, message: "Missing idToken" }, { status: 400 });
     }
 
+    const firebaseAdminAuth = getFirebaseAdminAuth();
     const decoded = await firebaseAdminAuth.verifyIdToken(idToken);
 
     const email = decoded.email;

@@ -1,6 +1,6 @@
 import admin from "firebase-admin";
 
-function getFirebaseAdminApp() {
+export function getFirebaseAdminApp() {
   if (admin.apps.length) {
     return admin.app();
   }
@@ -22,5 +22,7 @@ function getFirebaseAdminApp() {
   });
 }
 
-export const firebaseAdminApp = getFirebaseAdminApp();
-export const firebaseAdminAuth = admin.auth(firebaseAdminApp);
+export function getFirebaseAdminAuth() {
+  const app = getFirebaseAdminApp();
+  return admin.auth(app);
+}
