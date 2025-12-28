@@ -51,7 +51,7 @@ This is a smart, full-stack agentic ai interview platform designed to simulate r
 | **Voice Input**| Web Speech API (Browser) |
 | **File Processing** | PDF.js (pdfjs-dist), pdf-parse |
 | **Storage**    | ImageKit (for resume uploads) |
-| **Authentication** | JWT (jsonwebtoken, jose) | Fi
+| **Authentication** | JWT (jose) + Google Sign-In (Firebase Auth) |
 | **UI/UX** | Tailwind CSS, Lucide Icons, Glassmorphism Effects, next-themes (theme support) |
 ---
 
@@ -74,6 +74,20 @@ IMAGEKIT_PUBLIC_KEY=your_imagekit_public_key
 IMAGEKIT_PRIVATE_KEY=your_imagekit_private_key
 IMAGEKIT_URL_ENDPOINT=your_imagekit_url_endpoint
 IMAGEKIT_FOLDER=your_imagekit_folder
+
+# Firebase (Google Sign-In)
+NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
+
+# Firebase Admin (server-side verification for /api/auth/google)
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_CLIENT_EMAIL=your_service_account_client_email
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 
 Notes:
@@ -98,6 +112,17 @@ npm run dev
 ## 🔐 Auth & Data
 
 - MongoDB connection configured in `lib/mongodb.ts` (db name: `interview-ai`).
+- Google Sign-In flow:
+  - Client popup sign-in via Firebase Auth (`lib/firebaseClient.ts`)
+  - Exchange Firebase ID token at `POST /api/auth/google` to get an app JWT
+  - Server-side verification via Firebase Admin (`lib/firebaseAdmin.ts`)
+
+## 🚀 Deployment (Render)
+
+- Use Node.js LTS. This project pins Node in `package.json` via `engines.node`.
+- Set the same environment variables in Render dashboard (do not rely on `.env.local`).
+- In Firebase Console add your Render domain to:
+  - Authentication -> Settings -> Authorized domains
 
 ## 🤖 AI Features
 
