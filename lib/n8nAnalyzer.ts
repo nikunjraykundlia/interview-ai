@@ -7,7 +7,7 @@
  */
 
 const ANALYZER_WEBHOOK_URL =
-  "https://n8n.srv1220999.hstgr.cloud/webhook/analyse-q&a";
+  "https://n8n.srv1220999.hstgr.cloud/webhook-test/analyse-q&a";
 const TIMEOUT_MS = 20000; // 20 seconds
 
 /**
