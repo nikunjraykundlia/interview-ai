@@ -105,9 +105,9 @@ const fetchLatestMentorFeedback = async (userId: string): Promise<any> => {
   try {
     const interviews = await Interview.find({
       user: userId,
-      mentorAgentReviews: { $exists: true, $ne: [] }
+      mentorAgentReview: { $exists: true }
     })
-    .select('jobRole mentorAgentReviews createdAt completedAt')
+    .select('jobRole mentorAgentReview createdAt completedAt')
     .sort({ createdAt: -1 })
     .limit(1);
 
@@ -116,7 +116,7 @@ const fetchLatestMentorFeedback = async (userId: string): Promise<any> => {
     }
 
     const latestInterview = interviews[0];
-    const latestReview = latestInterview.mentorAgentReviews[latestInterview.mentorAgentReviews.length - 1];
+    const latestReview = latestInterview.mentorAgentReview;
 
     return {
       interviewId: latestInterview._id,
