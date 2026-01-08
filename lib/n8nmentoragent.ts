@@ -9,7 +9,7 @@
 import Interview from "../models/Interview";
 import { connectDB } from "./mongodb";
 
-const N8N_MENTOR_WEBHOOK = "https://n8n.srv1220999.hstgr.cloud/webhook-test/mentor-agent";
+const N8N_MENTOR_WEBHOOK = "https://n8n.srv1220999.hstgr.cloud/webhook/mentor-agent";
 
 export async function sendToN8nMentor(interview: any, token?: string) {
   // Defensive checks

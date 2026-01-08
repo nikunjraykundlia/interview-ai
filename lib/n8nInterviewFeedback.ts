@@ -6,7 +6,7 @@
  */
 
 const INTERVIEW_FEEDBACK_WEBHOOK_URL =
-  "https://n8n.srv1220999.hstgr.cloud/webhook-test/interview-feedback";
+  "https://n8n.srv1220999.hstgr.cloud/webhook/interview-feedback";
 const TIMEOUT_MS = 30000; // 30 seconds
 const MAX_RETRIES = 1;
 const RETRY_DELAY_MS = 2000; // 2 seconds
