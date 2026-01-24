@@ -273,4 +273,4 @@ The platform integrates with three n8n agentic workflows for enhanced AI capabil
 - Modern UI with glassmorphism and gradient effects
 - Real-time updates with Server-Sent Events (SSE)
 - Interactive UI components with smooth animations
-- **Research Page**: Advanced filtering and data visualization interface
+- Advanced filtering and data visualization interface
