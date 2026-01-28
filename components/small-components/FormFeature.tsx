@@ -5,7 +5,7 @@ const FormFeature = () => {
   return (
     <div className="w-[50%] max-sm:hidden h-screen flex flex-col items-center justify-center gap-10">
       <div className="flex items-center justify-center">
-        <h1 className="text-4xl font-bold ">Featured Features</h1>
+        <h1 className="text-4xl font-bold text-gray-900 dark:text-white">Featured Features</h1>
       </div>
 
       {/* features boxes */}

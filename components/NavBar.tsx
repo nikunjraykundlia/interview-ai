@@ -23,7 +23,7 @@ const NavBar = () => {
         <Link href={"/"} className="flex items-center gap-3">
           <Image width={60} height={60} src="/images/Logo.svg" alt="Logo" />
           {pathname !== "/" && pathname !== "/dashboard" && pathname !== "/login" && (
-            <h2 className="text-2xl font-medium text-white sm:text-3xl">
+            <h2 className="text-2xl font-medium text-gray-900 dark:text-white sm:text-3xl">
             </h2>
           )}
         </Link>
@@ -52,12 +52,12 @@ const NavBar = () => {
       <div className="lg:hidden">
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="text-white p-2"
+          className="text-gray-900 dark:text-white p-2"
           aria-label="Toggle mobile menu"
         >
-          <div className="w-6 h-0.5 bg-white mb-1.5 transition-all"></div>
-          <div className="w-6 h-0.5 bg-white mb-1.5 transition-all"></div>
-          <div className="w-6 h-0.5 bg-white transition-all"></div>
+          <div className="w-6 h-0.5 bg-gray-900 dark:bg-white mb-1.5 transition-all"></div>
+          <div className="w-6 h-0.5 bg-gray-900 dark:bg-white mb-1.5 transition-all"></div>
+          <div className="w-6 h-0.5 bg-gray-900 dark:bg-white transition-all"></div>
         </button>
       </div>
 
@@ -82,7 +82,7 @@ const NavBar = () => {
                 <li key={index} className="py-3 border-b border-gray-700">
                   <Link
                     href={link}
-                    className={`${pathname === link ? "font-bold text-white" : ""}`}
+                    className={`${pathname === link ? "font-bold text-gray-900 dark:text-white" : ""}`}
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     {item}

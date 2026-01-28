@@ -1,4 +1,5 @@
-// import { ThemeProvider } from "next-themes";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 import localfont from "next/font/local";
 import { Metadata } from "next";
@@ -50,25 +51,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-[var(--background)]">
+    <html lang="en" className="bg-[var(--background)]" suppressHydrationWarning>
       <body className={`${mazzard.variable} ${radis.variable} font-sans`} suppressHydrationWarning={true}>
-        <AuthProvider>
-          <div className="absolute left-0 -top-30 -z-10 max-sm:hidden">
-            <Image width={700} height={700} src="/images/bg-shade.png" alt="" />
-          </div>
-          <div className="absolute right-0 -z-10 max-sm:hidden">
-            <Image
-              className="bottom-0 right-0 -z-10"
-              width={700}
-              height={700}
-              src="/images/bg-shade2.png"
-              alt=""
-            />
-          </div>
-          <NavBarWrapper />
-          {children}
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <div className="absolute left-0 -top-30 -z-10 max-sm:hidden dark:block hidden">
+              <Image width={700} height={700} src="/images/bg-shade.png" alt="" />
+            </div>
+            <div className="absolute right-0 -z-10 max-sm:hidden dark:block hidden">
+              <Image
+                className="bottom-0 right-0 -z-10"
+                width={700}
+                height={700}
+                src="/images/bg-shade2.png"
+                alt=""
+              />
+            </div>
+            <NavBarWrapper />
+            {children}
+            <ThemeToggle />
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
 }
+

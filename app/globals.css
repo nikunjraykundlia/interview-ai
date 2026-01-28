@@ -1,19 +1,62 @@
 @import "tailwindcss";
 
+/* Configure dark mode to use .dark class (for next-themes compatibility) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 * {
   font-family: var(--font-mazzard);
 }
 
+/* Dark theme (default) */
 :root {
   --main-bg: #E5E9EB;
   --background: #050505;
+  --foreground: #ffffff;
   --nav-text: #848484;
   --theme-color: #B77895;
   --theme-hover: #ffacf3;
   --primary-bg: #161831;
   --secondry-text: #2C77EB;
-  --gradient-bg: linear-gradient(90deg,_rgba(44,119,235,1)_0%,_rgba(74,183,240,1)_100%);
+  --gradient-bg: linear-gradient(90deg, _rgba(44, 119, 235, 1)_0%, _rgba(74, 183, 240, 1)_100%);
   --input-bg: #23191E;
+  --card-bg: #1a1a2e;
+  --border-color: #333355;
+  color-scheme: dark;
+}
+
+/* Light theme */
+.light {
+  --main-bg: #f8f9fa;
+  --background: #ffffff;
+  --foreground: #050505;
+  --nav-text: #555555;
+  --theme-color: #9a5f7a;
+  --theme-hover: #d47fb3;
+  --primary-bg: #e8eaf6;
+  --secondry-text: #1a56c6;
+  --gradient-bg: linear-gradient(90deg, rgba(44, 119, 235, 1) 0%, rgba(74, 183, 240, 1) 100%);
+  --input-bg: #f0e8ec;
+  --card-bg: #f5f5f5;
+  --border-color: #d1d5db;
+  color-scheme: light;
+}
+
+/* Global transitions for smooth theme switching */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Apply transitions to common elements */
+*,
+*::before,
+*::after {
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 @theme {
@@ -21,10 +64,11 @@
   --font-mono: var(--font-geist-mono);
 }
 
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
+/* Dark mode autofill */
+.dark input:-webkit-autofill,
+.dark input:-webkit-autofill:hover,
+.dark input:-webkit-autofill:focus,
+.dark input:-webkit-autofill:active {
   background-color: var(--input-bg) !important;
   -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
   transition: background-color 5000s ease-in-out 0s;
@@ -32,29 +76,48 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: #fff !important;
 }
 
+/* Light mode autofill */
+:root:not(.dark) input:-webkit-autofill,
+:root:not(.dark) input:-webkit-autofill:hover,
+:root:not(.dark) input:-webkit-autofill:focus,
+:root:not(.dark) input:-webkit-autofill:active,
+.light input:-webkit-autofill,
+.light input:-webkit-autofill:hover,
+.light input:-webkit-autofill:focus,
+.light input:-webkit-autofill:active {
+  background-color: #f3f4f6 !important;
+  -webkit-box-shadow: 0 0 0px 1000px #f3f4f6 inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+  color: #111827 !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
 @layer utilities {
   .task-status {
     @apply px-2 py-1 text-xs rounded-full;
   }
+
   .input-div {
-    @apply flex items-center max-sm:w-full justify-center bg-[var(--input-bg)] sm:w-[50vw] h-[64px] rounded-[8px] px-6 gap-5;
+    @apply flex items-center max-sm:w-full justify-center bg-gray-100 dark:bg-[var(--input-bg)] sm:w-[50vw] h-[64px] rounded-[8px] px-6 gap-5 border border-gray-300 dark:border-transparent;
   }
+
   .input-field {
-    @apply w-full h-full text-base placeholder-zinc-400 font-semibold outline-none bg-transparent;
+    @apply w-full h-full text-base placeholder-gray-400 dark:placeholder-zinc-400 font-semibold outline-none bg-transparent text-gray-900 dark:text-white;
   }
+
   .btn-primary {
     @apply flex bg-[var(--input-bg)] w-full h-[64px] rounded-[8px] items-center justify-center gap-3 font-semibold border-2 border-gray-500 cursor-pointer hover:bg-transparent transition-all;
   }
-  
+
   /* Mobile-specific utilities */
   .mobile-container {
     @apply px-4 py-2 max-w-full mx-auto;
   }
-  
+
   .mobile-text-responsive {
     @apply text-sm sm:text-base lg:text-lg;
   }
-  
+
   .mobile-button {
     @apply py-3 px-6 text-sm sm:py-4 sm:px-8 sm:text-base;
   }
@@ -95,7 +158,7 @@ input:-webkit-autofill:active {
 }
 
 .bg {
-  background: linear-gradient(90deg, rgba(23,20,21,1) 0%, rgba(35,25,30,1) 100%);
+  background: linear-gradient(90deg, rgba(23, 20, 21, 1) 0%, rgba(35, 25, 30, 1) 100%);
 }
 
 .arrow-div {
@@ -103,11 +166,33 @@ input:-webkit-autofill:active {
 }
 
 @keyframes moveUpDown {
-  0%, 100% {
+
+  0%,
+  100% {
     top: 55vh;
   }
+
   50% {
     top: 52vh;
+  }
+}
+
+/* Mobile-specific arrow positioning - push it lower on small screens */
+@media (max-width: 640px) {
+  .arrow-div {
+    animation: moveUpDownMobile 3s ease-in-out infinite;
+  }
+
+  @keyframes moveUpDownMobile {
+
+    0%,
+    100% {
+      top: 68vh;
+    }
+
+    50% {
+      top: 65vh;
+    }
   }
 }
 
@@ -126,15 +211,15 @@ input:-webkit-autofill:active {
   height: var(--uib-size);
   width: var(--uib-size);
   animation: spin78236 calc(var(--uib-speed) * 2.5) infinite linear;
- }
- 
- .three-body__dot {
+}
+
+.three-body__dot {
   position: absolute;
   height: 100%;
   width: 30%;
- }
- 
- .three-body__dot:after {
+}
+
+.three-body__dot:after {
   content: '';
   position: absolute;
   height: 0%;
@@ -142,80 +227,81 @@ input:-webkit-autofill:active {
   padding-bottom: 100%;
   background-color: var(--uib-color);
   border-radius: 50%;
- }
- 
- .three-body__dot:nth-child(1) {
+}
+
+.three-body__dot:nth-child(1) {
   bottom: 5%;
   left: 0;
   transform: rotate(60deg);
   transform-origin: 50% 85%;
- }
- 
- .three-body__dot:nth-child(1)::after {
+}
+
+.three-body__dot:nth-child(1)::after {
   bottom: 0;
   left: 0;
   animation: wobble1 var(--uib-speed) infinite ease-in-out;
   animation-delay: calc(var(--uib-speed) * -0.3);
- }
- 
- .three-body__dot:nth-child(2) {
+}
+
+.three-body__dot:nth-child(2) {
   bottom: 5%;
   right: 0;
   transform: rotate(-60deg);
   transform-origin: 50% 85%;
- }
- 
- .three-body__dot:nth-child(2)::after {
+}
+
+.three-body__dot:nth-child(2)::after {
   bottom: 0;
   left: 0;
-  animation: wobble1 var(--uib-speed) infinite
-     calc(var(--uib-speed) * -0.15) ease-in-out;
- }
- 
- .three-body__dot:nth-child(3) {
+  animation: wobble1 var(--uib-speed) infinite calc(var(--uib-speed) * -0.15) ease-in-out;
+}
+
+.three-body__dot:nth-child(3) {
   bottom: -5%;
   left: 0;
   transform: translateX(116.666%);
- }
- 
- .three-body__dot:nth-child(3)::after {
+}
+
+.three-body__dot:nth-child(3)::after {
   top: 0;
   left: 0;
   animation: wobble2 var(--uib-speed) infinite ease-in-out;
- }
- 
- @keyframes spin78236 {
+}
+
+@keyframes spin78236 {
   0% {
-   transform: rotate(0deg);
+    transform: rotate(0deg);
   }
- 
+
   100% {
-   transform: rotate(360deg);
+    transform: rotate(360deg);
   }
- }
- 
- @keyframes wobble1 {
+}
+
+@keyframes wobble1 {
+
   0%,
-   100% {
-   transform: translateY(0%) scale(1);
-   opacity: 1;
+  100% {
+    transform: translateY(0%) scale(1);
+    opacity: 1;
   }
- 
+
   50% {
-   transform: translateY(-66%) scale(0.65);
-   opacity: 0.8;
+    transform: translateY(-66%) scale(0.65);
+    opacity: 0.8;
   }
- }
- 
- @keyframes wobble2 {
+}
+
+@keyframes wobble2 {
+
   0%,
-   100% {
-   transform: translateY(0%) scale(1);
-   opacity: 1;
+  100% {
+    transform: translateY(0%) scale(1);
+    opacity: 1;
   }
- 
+
   50% {
-   transform: translateY(66%) scale(0.65);
-   opacity: 0.8;
+    transform: translateY(66%) scale(0.65);
+    opacity: 0.8;
   }
- }
+}

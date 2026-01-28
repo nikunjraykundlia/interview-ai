@@ -6,7 +6,7 @@ import { firebaseAuth, googleProvider } from '@/lib/firebaseClient'
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 
-const OAuthBtn = ({path, text, account}: {path: string, text:string, account: string}) => {
+const OAuthBtn = ({ path, text, account }: { path: string, text: string, account: string }) => {
   const { login } = useAuth();
   const router = useRouter();
 
@@ -34,21 +34,21 @@ const OAuthBtn = ({path, text, account}: {path: string, text:string, account: st
   return (
     <div className='flex flex-col gap-6'>
       <div className="flex gap-3 items-center justify-center">
-          <h5>{account}</h5>
-          <Link href={path}>
-            <span className="text-base font-semibold text-[var(--secondry-text)] cursor-pointer">{text}</span>
-          </Link>
-        </div>
+        <h5 className="text-gray-700 dark:text-gray-300">{account}</h5>
+        <Link href={path}>
+          <span className="text-base font-semibold text-[var(--secondry-text)] cursor-pointer">{text}</span>
+        </Link>
+      </div>
 
-        <div className="flex w-[50vw] max-sm:w-full items-center mt-4">
-          <div className="w-full border-t-2 border-zinc-600"></div>
-          <span className="text-base whitespace-nowrap px-4 text-[#B9B9B9]">Or continue with</span>
-          <div className="w-full border-t-2 border-zinc-600"></div>
-        </div>
+      <div className="flex w-[50vw] max-sm:w-full items-center mt-4">
+        <div className="w-full border-t-2 border-gray-300 dark:border-zinc-600"></div>
+        <span className="text-base whitespace-nowrap px-4 text-gray-500 dark:text-[#B9B9B9]">Or continue with</span>
+        <div className="w-full border-t-2 border-gray-300 dark:border-zinc-600"></div>
+      </div>
 
-        <div className="flex w-[50vw] max-sm:w-full justify-center gap-4">
-            <SocialBtn src="/images/google.svg" alt="google" name="Google" onClick={handleGoogle}/>
-          </div>
+      <div className="flex w-[50vw] max-sm:w-full justify-center gap-4">
+        <SocialBtn src="/images/google.svg" alt="google" name="Google" onClick={handleGoogle} />
+      </div>
     </div>
   )
 }

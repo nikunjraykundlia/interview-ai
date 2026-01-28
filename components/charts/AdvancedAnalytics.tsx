@@ -43,7 +43,7 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({ performanceData, 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
       {/* Cumulative Performance Chart */}
-      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6 shadow-2xl">
+      <div className="bg-[#0d0d1a] border border-purple-500/30 rounded-2xl p-6 shadow-2xl">
         <h3 className="text-xl font-bold text-white mb-4">Cumulative Performance Trend</h3>
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart
@@ -56,19 +56,19 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({ performanceData, 
             }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#4c1d95" />
-            <XAxis 
-              dataKey="date" 
-              stroke="#c084fc" 
-              tick={{ fill: '#e2e8f0' }} 
+            <XAxis
+              dataKey="date"
+              stroke="#c084fc"
+              tick={{ fill: '#e2e8f0' }}
             />
-            <YAxis 
-              stroke="#c084fc" 
+            <YAxis
+              stroke="#c084fc"
               tick={{ fill: '#e2e8f0' }}
               domain={[0, 100]}
             />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'rgba(30, 10, 40, 0.9)', 
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'rgba(30, 10, 40, 0.9)',
                 borderColor: '#8b5cf6',
                 borderRadius: '0.5rem',
                 color: 'white'
@@ -76,18 +76,18 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({ performanceData, 
               itemStyle={{ color: 'white' }}
               labelStyle={{ color: '#c084fc', fontWeight: 'bold' }}
             />
-            <Area 
-              type="monotone" 
-              dataKey="cumulativeScore" 
-              stroke="#8b5cf6" 
-              fill="url(#colorUv)" 
+            <Area
+              type="monotone"
+              dataKey="cumulativeScore"
+              stroke="#ffffff"
+              fill="url(#colorUv)"
               fillOpacity={0.3}
               name="Average Score"
             />
             <defs>
               <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#8b5cf6" stopOpacity={0.8}/>
-                <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0.1}/>
+                <stop offset="5%" stopColor="#ffffff" stopOpacity={0.8} />
+                <stop offset="95%" stopColor="#ffffff" stopOpacity={0.1} />
               </linearGradient>
             </defs>
           </AreaChart>
@@ -95,27 +95,27 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({ performanceData, 
       </div>
 
       {/* Skills Assessment Radar Chart */}
-      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6 shadow-2xl">
+      <div className="bg-[#0d0d1a] border border-purple-500/30 rounded-2xl p-6 shadow-2xl">
         <h3 className="text-xl font-bold text-white mb-4">Skills Assessment Radar</h3>
         <ResponsiveContainer width="100%" height={300}>
           <RadarChart cx="50%" cy="50%" outerRadius="80%" data={skillData}>
             <PolarGrid stroke="#4c1d95" />
             <PolarAngleAxis dataKey="subject" tick={{ fill: '#e2e8f0' }} />
-            <PolarRadiusAxis 
-              angle={30} 
-              domain={[0, 100]} 
+            <PolarRadiusAxis
+              angle={30}
+              domain={[0, 100]}
               tick={{ fill: '#e2e8f0' }}
             />
             <Radar
               name="User Skills"
               dataKey="A"
-              stroke="#8b5cf6"
-              fill="#8b5cf6"
+              stroke="#ffffff"
+              fill="#ffffff"
               fillOpacity={0.3}
             />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'rgba(30, 10, 40, 0.9)', 
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'rgba(30, 10, 40, 0.9)',
                 borderColor: '#8b5cf6',
                 borderRadius: '0.5rem',
                 color: 'white'
@@ -126,7 +126,7 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({ performanceData, 
       </div>
 
       {/* Experience vs Score Correlation */}
-      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6 shadow-2xl lg:col-span-2">
+      <div className="bg-[#0d0d1a] border border-purple-500/30 rounded-2xl p-6 shadow-2xl lg:col-span-2">
         <h3 className="text-xl font-bold text-white mb-4">Experience vs Performance Correlation</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart
@@ -139,22 +139,22 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({ performanceData, 
             }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#4c1d95" />
-            <XAxis 
-              dataKey="jobRole" 
-              stroke="#c084fc" 
-              tick={{ fill: '#e2e8f0' }} 
+            <XAxis
+              dataKey="jobRole"
+              stroke="#c084fc"
+              tick={{ fill: '#e2e8f0' }}
               angle={-45}
               textAnchor="end"
               height={80}
             />
-            <YAxis 
-              stroke="#c084fc" 
+            <YAxis
+              stroke="#c084fc"
               tick={{ fill: '#e2e8f0' }}
               domain={[0, 100]}
             />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'rgba(30, 10, 40, 0.9)', 
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'rgba(30, 10, 40, 0.9)',
                 borderColor: '#8b5cf6',
                 borderRadius: '0.5rem',
                 color: 'white'
@@ -162,7 +162,7 @@ const AdvancedAnalytics: React.FC<AdvancedAnalyticsProps> = ({ performanceData, 
               itemStyle={{ color: 'white' }}
               labelStyle={{ color: '#c084fc', fontWeight: 'bold' }}
             />
-            <Bar dataKey="score" fill="#8b5cf6" name="Score" />
+            <Bar dataKey="score" fill="#ffffff" name="Score" />
           </BarChart>
         </ResponsiveContainer>
       </div>

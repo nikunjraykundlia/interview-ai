@@ -71,40 +71,40 @@ const ResearchDashboard = () => {
   return (
     <div className="p-10 mx-auto max-w-7xl">
       <div className="mb-12 text-center">
-        <h1 className="text-4xl font-bold text-white mb-4">
+        <h1 className="text-4xl font-bold text-black dark:text-white mb-4">
           Research Dashboard
         </h1>
-        <p className="text-xl text-purple-300 max-w-3xl mx-auto">
+        <p className="text-xl text-purple-600 dark:text-purple-300 max-w-3xl mx-auto">
           Comprehensive Analytics and Insights in Interview Simulations
         </p>
       </div>
 
       {/* Key Metrics Summary */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-        <div className="bg-gradient-to-br from-purple-500/10 to-purple-600/10 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6 text-center">
+        <div className="bg-[#1a1a2e] border border-purple-500/30 rounded-2xl p-6 text-center">
           <div className="text-3xl font-bold text-white mb-2">
             {interviews.length}
           </div>
           <p className="text-purple-200 font-medium">Total Interviews</p>
         </div>
-        
-        <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/10 backdrop-blur-sm border border-blue-500/20 rounded-2xl p-6 text-center">
+
+        <div className="bg-[#1a1a2e] border border-blue-500/30 rounded-2xl p-6 text-center">
           <div className="text-3xl font-bold text-white mb-2">
-            {interviews.length > 0 
-              ? Math.round(interviews.reduce((sum, interview) => sum + (interview.overallScore || 0), 0) / interviews.length) 
+            {interviews.length > 0
+              ? Math.round(interviews.reduce((sum, interview) => sum + (interview.overallScore || 0), 0) / interviews.length)
               : 0}
           </div>
           <p className="text-blue-200 font-medium">Avg. Score</p>
         </div>
-        
-        <div className="bg-gradient-to-br from-green-500/10 to-green-600/10 backdrop-blur-sm border border-green-500/20 rounded-2xl p-6 text-center">
+
+        <div className="bg-[#1a1a2e] border border-green-500/30 rounded-2xl p-6 text-center">
           <div className="text-3xl font-bold text-white mb-2">
             {interviews.filter(i => i.status === 'completed').length}
           </div>
           <p className="text-green-200 font-medium">Completed</p>
         </div>
-        
-        <div className="bg-gradient-to-br from-yellow-500/10 to-yellow-600/10 backdrop-blur-sm border border-yellow-500/20 rounded-2xl p-6 text-center">
+
+        <div className="bg-[#1a1a2e] border border-yellow-500/30 rounded-2xl p-6 text-center">
           <div className="text-3xl font-bold text-white mb-2">
             {Array.from(new Set(interviews.flatMap(i => i.techStack))).length}
           </div>
@@ -115,8 +115,8 @@ const ResearchDashboard = () => {
       {/* Performance Analytics */}
       <div className="mb-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">Performance Analytics</h2>
-          <p className="text-gray-400">Tracking improvement over time</p>
+          <h2 className="text-2xl font-bold text-black dark:text-white">Performance Analytics</h2>
+          <p className="text-black dark:text-gray-400">Tracking improvement over time</p>
         </div>
         <PerformanceChart data={performanceData} />
       </div>
@@ -124,8 +124,8 @@ const ResearchDashboard = () => {
       {/* Interview Statistics */}
       <div className="mb-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">Interview Statistics</h2>
-          <p className="text-gray-400">Distribution of roles and technologies</p>
+          <h2 className="text-2xl font-bold text-black dark:text-white">Interview Statistics</h2>
+          <p className="text-black dark:text-gray-400">Distribution of roles and technologies</p>
         </div>
         <StatsChart data={statsData} />
       </div>
@@ -133,13 +133,13 @@ const ResearchDashboard = () => {
       {/* Advanced Analytics */}
       <div className="mb-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-white">Advanced Analytics</h2>
-          <p className="text-gray-400">Deep insights into performance patterns</p>
+          <h2 className="text-2xl font-bold text-black dark:text-white">Advanced Analytics</h2>
+          <p className="text-black dark:text-gray-400">Deep insights into performance patterns</p>
         </div>
         <AdvancedAnalytics performanceData={performanceData} statsData={statsData} />
       </div>
 
-          </div>
+    </div>
   );
 };
 

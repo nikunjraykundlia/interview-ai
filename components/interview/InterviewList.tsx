@@ -144,7 +144,7 @@ export default function InterviewList() {
   }
 
   return (
-    <div className="space-y-6 text-white">
+    <div className="space-y-6 text-gray-900 dark:text-white">
       {error && (
         <div className="px-4 py-3 mb-4 text-red-700 bg-red-100 border border-red-400 rounded">
           {error}
@@ -164,11 +164,11 @@ export default function InterviewList() {
           {interviews.map((interview) => (
             <div
               key={interview._id}
-              className="bg border border-[#352a31] max-w-[800px] max-sm:w-full rounded-xl shadow-md px-6 py-8"
+              className="bg-[#171415] border border-[#352a31] max-w-[800px] max-sm:w-full rounded-xl shadow-md px-6 py-8"
             >
               {/* // job role, status */}
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xl font-bold uppercase max-sm:text-base">
+                <h3 className="text-xl font-bold uppercase max-sm:text-base text-white">
                   {interview.jobRole}
                 </h3>
                 {getStatusBadge(interview.status)}
@@ -201,8 +201,8 @@ export default function InterviewList() {
                               interview.overallScore >= 70
                                 ? "text-green-500"
                                 : interview.overallScore >= 50
-                                ? "text-yellow-500"
-                                : "text-red-500"
+                                  ? "text-yellow-500"
+                                  : "text-red-500"
                             }
                           >
                             {interview.overallScore}
@@ -221,8 +221,8 @@ export default function InterviewList() {
                               interview.overallScore >= 70
                                 ? "text-green-500"
                                 : interview.overallScore >= 50
-                                ? "text-yellow-500"
-                                : "text-red-500"
+                                  ? "text-yellow-500"
+                                  : "text-red-500"
                             }
                           >
                             {interview.overallScore}

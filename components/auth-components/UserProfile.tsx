@@ -35,10 +35,10 @@ const UserProfile = () => {
     <div className="relative user-profile-dropdown">
       <div
         onClick={() => setOpen(!open)}
-        className="flex bg-zinc-900 cursor-pointer rounded-full px-2 py-2 gap-5 hover:bg-zinc-800 transition-colors"
+        className="flex bg-gray-100 dark:bg-zinc-900 cursor-pointer rounded-full px-2 py-2 gap-5 hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 max-sm:w-8 max-sm:h-8 flex items-center justify-center rounded-full bg-zinc-700">
+          <div className="w-10 h-10 max-sm:w-8 max-sm:h-8 flex items-center justify-center rounded-full bg-gray-300 dark:bg-zinc-700">
             {userData.avatar ? (
               <Image
                 width={40}
@@ -57,23 +57,22 @@ const UserProfile = () => {
             )}
           </div>
 
-          <div className="text-white flex flex-col pr-6 -space-y-1">
+          <div className="text-gray-900 dark:text-white flex flex-col pr-6 -space-y-1">
             <span className="font-medium max-sm:text-xs">{userData.name}</span>
-            <span className="text-xs max-sm:text-[10px] text-zinc-400">{userData.email}</span>
+            <span className="text-xs max-sm:text-[10px] text-gray-500 dark:text-zinc-400">{userData.email}</span>
           </div>
         </div>
       </div>
       {open && (
-        <div className="text-white absolute mt-2 w-full z-10 bg-zinc-900 rounded-lg shadow-lg border border-zinc-800">
+        <div className="text-gray-900 dark:text-white absolute mt-2 w-full z-10 bg-gray-100 dark:bg-zinc-900 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-800">
           <ul className="py-1">
             <li
               onClick={() => {
                 router.push("/dashboard");
                 setOpen(false);
               }}
-              className={`border-b cursor-pointer hover:bg-zinc-800 p-3 rounded-t-lg border-zinc-800 ${
-                pathname === "/dashboard" ? "bg-zinc-800" : ""
-              }`}
+              className={`border-b cursor-pointer hover:bg-gray-200 dark:hover:bg-zinc-800 p-3 rounded-t-lg border-gray-200 dark:border-zinc-800 ${pathname === "/dashboard" ? "bg-gray-200 dark:bg-zinc-800" : ""
+                }`}
             >
               Dashboard
             </li>
@@ -82,7 +81,7 @@ const UserProfile = () => {
                 setOpen(false);
                 logout();
               }}
-              className="p-3 rounded-b-lg cursor-pointer font-semibold text-red-400 hover:bg-zinc-800 transition-colors"
+              className="p-3 rounded-b-lg cursor-pointer font-semibold text-red-500 dark:text-red-400 hover:bg-gray-200 dark:hover:bg-zinc-800 transition-colors"
             >
               Logout
             </li>

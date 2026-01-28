@@ -40,11 +40,11 @@ const StatsChart: React.FC<StatsChartProps> = ({ data }) => {
   // Safely handle cases where data might be undefined
   const jobRoles = data?.jobRoles || [];
   const techStacks = data?.techStacks || [];
-  
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
       {/* Job Roles Chart */}
-      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6 shadow-2xl">
+      <div className="bg-[#0d0d1a] border border-purple-500/30 rounded-2xl p-6 shadow-2xl">
         <h3 className="text-xl font-bold text-white mb-4">Interview Distribution by Job Role</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart
@@ -57,18 +57,18 @@ const StatsChart: React.FC<StatsChartProps> = ({ data }) => {
             }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#4c1d95" />
-            <XAxis 
-              dataKey="name" 
-              stroke="#c084fc" 
-              tick={{ fill: '#e2e8f0' }} 
-            />
-            <YAxis 
-              stroke="#c084fc" 
+            <XAxis
+              dataKey="name"
+              stroke="#c084fc"
               tick={{ fill: '#e2e8f0' }}
             />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'rgba(30, 10, 40, 0.9)', 
+            <YAxis
+              stroke="#c084fc"
+              tick={{ fill: '#e2e8f0' }}
+            />
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'rgba(30, 10, 40, 0.9)',
                 borderColor: '#8b5cf6',
                 borderRadius: '0.5rem',
                 color: 'white'
@@ -77,13 +77,13 @@ const StatsChart: React.FC<StatsChartProps> = ({ data }) => {
               labelStyle={{ color: '#c084fc', fontWeight: 'bold' }}
             />
             <Legend />
-            <Bar dataKey="count" fill="#8b5cf6" name="Interview Count" />
+            <Bar dataKey="count" fill="#ffffff" name="Interview Count" />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       {/* Tech Stacks Chart */}
-      <div className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6 shadow-2xl">
+      <div className="bg-[#0d0d1a] border border-purple-500/30 rounded-2xl p-6 shadow-2xl">
         <h3 className="text-xl font-bold text-white mb-4">Technology Stack Distribution</h3>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
@@ -102,9 +102,9 @@ const StatsChart: React.FC<StatsChartProps> = ({ data }) => {
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: 'rgba(30, 10, 40, 0.9)', 
+            <Tooltip
+              contentStyle={{
+                backgroundColor: 'rgba(30, 10, 40, 0.9)',
                 borderColor: '#8b5cf6',
                 borderRadius: '0.5rem',
                 color: 'white'

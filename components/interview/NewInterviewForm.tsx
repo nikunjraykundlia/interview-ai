@@ -149,8 +149,8 @@ const NewInterviewForm = ({
         className="w-[50%] max-sm:w-full flex flex-col items-center justify-center"
       >
         <div className="flex flex-col items-center justify-center mt-10">
-          <h1 className="text-4xl font-semibold">Welcome Buddy!</h1>
-          <p>Create your interview to start your journey!</p>
+          <h1 className="text-4xl font-semibold text-gray-900 dark:text-white">Welcome Buddy!</h1>
+          <p className="text-gray-600 dark:text-gray-300">Create your interview to start your journey!</p>
         </div>
 
         <div className="flex items-center rounded-xl flex-col gap-4 w-[55%] max-sm:w-full max-sm:px-8 p-4 min-h-[70%] mt-6">
@@ -185,9 +185,9 @@ const NewInterviewForm = ({
 
           {/* resume upload */}
           <div className="flex flex-col w-[100%]">
-            <label className="mb-2 text-sm">Upload Resume</label>
+            <label className="mb-2 text-sm text-gray-900 dark:text-white">Upload Resume</label>
             <input
-              className="border py-2 cursor-pointer rounded-lg px-4 border-zinc-700 w-[100%]"
+              className="border py-2 cursor-pointer rounded-lg px-4 border-gray-300 dark:border-zinc-700 bg-white dark:bg-transparent text-gray-900 dark:text-white w-[100%]"
               type="file"
               accept=".pdf"
               onChange={(e) => {
@@ -259,11 +259,10 @@ const NewInterviewForm = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`px-4 w-full py-2 rounded-md shadow-sm text-sm font-medium cursor-pointer transition-all duration-300 text-white ${
-                isSubmitting
+              className={`px-4 w-full py-2 rounded-md shadow-sm text-sm font-medium cursor-pointer transition-all duration-300 text-white ${isSubmitting
                   ? "bg-[#984CFF]"
                   : "bg-[#984CFF] hover:bg-[#974cffba]"
-              }`}
+                }`}
             >
               {isSubmitting ? "Creating..." : "Start Interview"}
             </button>

@@ -64,7 +64,7 @@ const Dashboard = () => {
   };
 
   const completedInterviews = interviews.filter(i => i.status === 'completed').length;
-  const averageScore = interviews.length > 0 
+  const averageScore = interviews.length > 0
     ? Math.round(interviews.reduce((sum, interview) => sum + (interview.overallScore || 0), 0) / interviews.length)
     : 0;
 
@@ -73,10 +73,10 @@ const Dashboard = () => {
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center justify-between w-full max-sm:flex-col max-sm:text-center">
           <div>
-            <h1 className="text-3xl font-bold text-white sm:mb-2">
+            <h1 className="text-3xl font-bold text-black dark:text-white sm:mb-2">
               Your Interviews
             </h1>
-            <p className="text-gray-500 max-sm:text-sm">
+            <p className="text-black dark:text-gray-500 max-sm:text-sm">
               Practice your Interview Skills with AI Agents
             </p>
           </div>
@@ -90,9 +90,9 @@ const Dashboard = () => {
         </div>
       </div>
 
-      
+
       <div className="mt-8">
-        <h2 className="text-2xl font-bold text-white mb-6"></h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6"></h2>
         <InterviewList />
       </div>
     </div>

@@ -64,7 +64,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center w-full h-screen gap-10 text-white max-sm:px-8">
+    <div className="relative flex flex-col items-center justify-center w-full h-screen gap-10 text-gray-900 dark:text-white max-sm:px-8">
       <Image
         width={200}
         height={200}
@@ -89,7 +89,7 @@ export default function LoginPage() {
 
       <div className="flex items-center justify-center gap-6">
         <div className="bg-[var(--theme-color)] max-sm:hidden rounded-full w-[73px] h-[73px]"></div>
-        <h1 className="text-4xl font-bold max-sm:text-center max-sm:text-2xl">
+        <h1 className="text-4xl font-bold max-sm:text-center max-sm:text-2xl text-gray-900 dark:text-white">
           Welcome to Sign In{" "}
           <span className="text-[var(--theme-color)]">Buddy!</span>
         </h1>
@@ -131,10 +131,11 @@ export default function LoginPage() {
             <div className="flex items-center justify-center gap-3">
               <input
                 type="checkbox"
-                className="w-[24px] h-[24px] cursor-pointer text-blue-800 border-2 rounded-md border-white outline-none bg-transparent appearance-none checked:bg-blue-800 checked:border-white"
+                className="w-[24px] h-[24px] cursor-pointer text-blue-800 border-2 rounded-md border-gray-600 dark:border-white outline-none bg-transparent appearance-none checked:bg-blue-800 checked:border-blue-800"
                 name="remember-me"
+                id="remember-me"
               />
-              <label className="text-base font-medium" htmlFor="remember-me">
+              <label className="text-base font-medium text-gray-900 dark:text-white" htmlFor="remember-me">
                 Remember Me
               </label>
             </div>
