@@ -196,9 +196,29 @@ body {
   }
 }
 
-/* .logo {
-  font-family: var(--font-radis);
-} */
+.logo {
+  font-family: var(--font-radis), sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--foreground);
+  transition: color 0.3s ease;
+  line-height: 1;
+  user-select: none;
+  margin-left: 1.25rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.logo .highlight {
+  color: var(--theme-color);
+  transition: color 0.3s ease;
+}
+
+@media (max-width: 640px) {
+  .logo {
+    font-size: 1.25rem;
+  }
+}
 
 .nav-hover::after {
   content: "";

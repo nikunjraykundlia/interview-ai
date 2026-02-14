@@ -2,20 +2,15 @@
 
 import { ArrowLeft, Timer } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 
 const InterviewNav = ({ interview }: { interview: any }) => {
   return (
     <>
       <div className="sticky top-0 z-10 flex items-center justify-between p-4 text-white border-b shadow-lg md:py-6 md:px-10 border-slate-800/80 bg-black/30 backdrop-blur-md">
         <div className="flex gap-4">
-          <Image
-            width={40}
-            height={40}
-            className="max-sm:hidden"
-            src="/images/Logo.svg"
-            alt="Logo Image"
-          />
+          <span className="logo max-sm:hidden" style={{ color: '#ffffff' }}>
+            Inter<span className="highlight">View</span>ture
+          </span>
           <div className="text-sm leading-2 max-sm:text-xs">
             <h1 className="text-3xl font-bold tracking-tighter max-sm:text-base">
               {interview.jobRole} interview

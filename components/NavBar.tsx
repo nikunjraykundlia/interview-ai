@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import Button from "./Button";
 import Link from "next/link";
 import UserProfile from "./auth-components/UserProfile";
@@ -42,7 +41,9 @@ const NavBar = () => {
     <nav className="min-h-[100px] items-center flex sm:px-10 px-4 justify-between safe-area-inset">
       <div className="flex items-center gap-3">
         <Link href={"/"} className="flex items-center gap-3">
-          <Image width={60} height={60} src="/images/Logo.svg" alt="Logo" />
+          <span className="logo">
+            Inter<span className="highlight">View</span>ture
+          </span>
           {pathname !== "/" && pathname !== "/dashboard" && pathname !== "/login" && (
             <h2 className="text-2xl font-medium text-gray-900 dark:text-white sm:text-3xl">
             </h2>
