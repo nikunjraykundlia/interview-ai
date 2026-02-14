@@ -87,7 +87,7 @@ const NavBar = () => {
       </div>
 
       {/* Desktop Auth */}
-      <div className="max-lg:hidden flex items-center gap-6">
+      <div className="max-lg:hidden flex items-center gap-6 mr-5">
         {isAuthenticated ? (
           <UserProfile />
         ) : (
