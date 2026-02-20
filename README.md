@@ -187,33 +187,7 @@ The platform integrates with three n8n agentic workflows for enhanced AI capabil
   "actionableAdviceForInterviewerAgent": "string"
   }
   ```
-
-### Workflow Trigger Points
-
-1. **Question Generation**: Triggered when creating a new interview (`POST /api/interview`)
-   - Sends job role, years of experience, job description, tech stack, and resume data
-   - Returns array of interview questions
-   - Falls back to Gemini if n8n fails
-   - Stores questions in `workflowQuestions` field if using n8n, otherwise generates locally
-
-2. **Answer Analysis**: Triggered asynchronously when submitting an answer (`POST /api/interview/[id]/answer`)
-   - Non-blocking: answer is saved immediately, analysis happens in background
-   - Updates interview document when analysis completes
-   - Analysis page polls every 1.5 seconds for updates
-   - Stores analysis results in `questions[].analysis` object
-
-3. **Interview Feedback**: Triggered when completing an interview (`POST /api/interview/[id]/complete`)
-   - Sends all Q&A pairs along with interview metadata
-   - Generates comprehensive feedback via n8n feedback webhook
-   - Stores feedback in `feedback` object with overallFeedback, strengths, areasForImprovement, nextSteps
-   - Sets interview status to "completed" and updates completedAt timestamp
-
-4. **Mentor Agent Review**: Triggered when requesting mentor feedback (`POST /api/interview/[id]/mentor`)
-   - Sends completed interview data for mentor analysis
-   - Generates detailed critique of question quality and interviewer performance
-   - Stores review in `mentorAgentReviews` array with comprehensive feedback fields
-   - Provides actionable advice for improving future interview sessions
-
+  
 ## 🚀 Development Notes
 
 - Uses Next.js 16 with Turbopack for fast development
