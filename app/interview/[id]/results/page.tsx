@@ -83,9 +83,9 @@ export default function ResultsPage({ params }: ResultsPageProps) {
   }, [interviewId, router]);
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-500";
-    if (score >= 60) return "text-yellow-500";
-    return "text-red-500";
+    if (score >= 80) return "dark:text-green-500 text-green-700";
+    if (score >= 60) return "dark:text-yellow-500 text-yellow-700";
+    return "dark:text-red-500 text-red-700";
   };
 
   const getScoreLabel = (score: number) => {
@@ -157,7 +157,7 @@ export default function ResultsPage({ params }: ResultsPageProps) {
   return (
     <>
       <InterviewNav interview={interview} />
-      <div className="text-white container mx-auto py-6 px-4 sm:px-6 max-w-7xl safe-area-inset">
+      <div className="dark:text-white text-gray-900 container mx-auto py-6 px-4 sm:px-6 max-w-7xl safe-area-inset">
         {/* // results nav */}
         <ResultsNav
           interviewId={interviewId}

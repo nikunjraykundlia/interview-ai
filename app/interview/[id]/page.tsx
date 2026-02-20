@@ -116,7 +116,7 @@ export default function InterviewPage({ params }: InterviewPageProps) {
   return (
     <>
       <InterviewNav interview={interview} />
-      <div className="py-6 text-white max-sm:px-4 px-22">
+      <div className="py-6 dark:text-white text-gray-900 max-sm:px-4 px-22">
         <div className="mb-6"></div>
 
         <InterviewSession

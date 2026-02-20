@@ -19,7 +19,7 @@ const TechnicalAndCommunication = ({
 }: TechnicalAnalysisProps) => {
   return (
     <div className="space-y-2">
-      <h3 className="font-medium text-gray-300">{text}</h3>
+      <h3 className="font-medium dark:text-gray-300 text-gray-700">{text}</h3>
       <div
         className={`p-4 rounded-md ${scoreBackground(
           activeQuestion.analysis[score] || activeQuestion.analysis.score

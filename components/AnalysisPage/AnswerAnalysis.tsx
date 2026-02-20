@@ -38,10 +38,10 @@ const AnswerAnalysis = ({
 
       {/* improvement suggestion */}
       <div>
-        <h3 className="font-medium text-gray-300 mb-2">
+        <h3 className="font-medium dark:text-gray-300 text-gray-700 mb-2">
           Improvement Suggestions
         </h3>
-        <div className="bg-pink-300/10 p-4 rounded-md">
+        <div className="dark:bg-pink-300/10 bg-pink-100/80 p-4 rounded-md">
           <ul className="list-disc pl-5 space-y-1">
             {activeQuestion.analysis.improvementSuggestions ? (
               activeQuestion.analysis.improvementSuggestions.map(
@@ -59,10 +59,10 @@ const AnswerAnalysis = ({
       {/* sample ideal answer */}
       {activeQuestion.analysis.idealAnswer && (
         <div className="mt-6">
-          <h3 className="font-medium text-gray-300 mb-2">
+          <h3 className="font-medium dark:text-gray-300 text-gray-700 mb-2">
             Sample Ideal Answer
           </h3>
-          <div className="bg-green-900/20 p-4 rounded-md border border-green-800">
+          <div className="dark:bg-green-900/20 bg-green-100/80 p-4 rounded-md dark:border-green-800 border-green-300">
             <p className="italic">{activeQuestion.analysis.idealAnswer}</p>
           </div>
         </div>

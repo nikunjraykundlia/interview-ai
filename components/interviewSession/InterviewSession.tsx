@@ -565,7 +565,7 @@ export default function InterviewSession({
   };
 
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6 text-white bg-[var(--input-bg)]/30 rounded-lg shadow-sm">
+    <div className="flex flex-col gap-4 sm:gap-6 p-4 sm:p-6 dark:text-white text-gray-900 dark:bg-[var(--input-bg)]/30 bg-white/50 rounded-lg shadow-sm">
       {/*previous, next btn question length  */}
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-0">
@@ -610,7 +610,7 @@ export default function InterviewSession({
         {/* web cam section - hidden on very small screens, shown as collapsible on mobile */}
         <div className="w-full lg:w-1/3 bg-gradient-to-r from-[#b87a9c]/20 to-[#d8a1bc]/10 rounded-xl backdrop-blur-sm border border-[#b87a9c]/30 shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-[#b87a9c]/20 to-transparent p-4 sm:p-6">
-            <h1 className="flex items-center gap-2 text-lg sm:text-xl font-semibold text-white">
+            <h1 className="flex items-center gap-2 text-lg sm:text-xl font-semibold dark:text-white text-gray-900">
               <span className="h-4 sm:h-5 w-1 bg-[#b87a9c] rounded-full"></span>
               Voice Response
             </h1>
@@ -663,7 +663,7 @@ export default function InterviewSession({
                 Interview Tips:
               </h2>
 
-              <ul className="mt-3 sm:mt-4 space-y-2 sm:space-y-3 text-xs text-slate-400">
+              <ul className="mt-3 sm:mt-4 space-y-2 sm:space-y-3 text-xs dark:text-slate-400 text-slate-600">
                 <li className="flex items-center gap-2 bg-[#b87a9c]/10 p-2 rounded-md border border-[#b8a1bc]/30 hover:border-[#b87a9c]/30 transition-all">
                   <span className="bg-[#b87a9c]/20 text-[#d8a1bc] rounded-full p-1 mt-0.5">
                     <Zap className="w-3 h-3" />
@@ -737,7 +737,7 @@ export default function InterviewSession({
                 Your Answer
               </h2>
               <textarea
-                className="min-h-[180px] w-full rounded-xl p-4 border border-[#b8a1bc]/30 bg-[var(--input-bg)]/80 text-slate-200 placeholder:text-slate-500 resize-none focus:border-[#b87a9c] focus:ring-[#b87a9c]/20 shadow-inner"
+                className="min-h-[180px] w-full rounded-xl p-4 border border-[#b8a1bc]/30 dark:bg-[var(--input-bg)]/80 bg-white/80 dark:text-slate-200 text-gray-800 dark:placeholder:text-slate-500 placeholder:text-gray-500 resize-none focus:border-[#b87a9c] focus:ring-[#b87a9c]/20 shadow-inner"
                 value={userAnswer}
                 onChange={(e) => setUserAnswer(e.target.value)}
                 placeholder="Your answer will appear here as you speak. You can also type or edit your answer."
@@ -745,7 +745,7 @@ export default function InterviewSession({
               />
 
               {isRecording && transcript && (
-                <div className="p-2 mt-2 text-sm text-gray-300 bg-gray-700 rounded">
+                <div className="p-2 mt-2 text-sm dark:text-gray-300 text-gray-800 dark:bg-gray-700 bg-gray-200 rounded">
                   <span className="font-medium">Currently transcribing:</span>{" "}
                   {transcript}
                 </div>
@@ -760,7 +760,7 @@ export default function InterviewSession({
               {/* submit answer */}
 
               <div className="flex items-center justify-between mt-4">
-                <div className="text-sm font-medium text-zinc-300">
+                <div className="text-sm font-medium dark:text-zinc-300 text-zinc-600">
                   {interview.questions[currentIndex].answer
                     ? "This question has been asnwered. You can edit your answer."
                     : ""}

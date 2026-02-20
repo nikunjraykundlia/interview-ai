@@ -27,10 +27,10 @@ const QuizAndAnswer = ({
           <div className="flex flex-col items-start sm:items-end w-full sm:w-auto">
             <div
               className={`px-3 py-1 text-sm rounded-full font-medium ${activeQuestion.analysis.score >= 80
-                  ? "bg-green-900/30 text-green-300"
-                  : activeQuestion.analysis.score >= 60
-                    ? "bg-yellow-900/30 text-yellow-300"
-                    : "bg-red-900/30 text-red-300"
+                ? "dark:bg-green-900/30 dark:text-green-300 bg-green-100 text-green-800 border border-green-300"
+                : activeQuestion.analysis.score >= 60
+                  ? "dark:bg-yellow-900/30 dark:text-yellow-300 bg-yellow-100 text-yellow-800 border border-yellow-300"
+                  : "dark:bg-red-900/30 dark:text-red-300 bg-red-100 text-red-800 border border-red-300"
                 }`}
             >
               Score: {activeQuestion.analysis.score}/100
@@ -60,7 +60,7 @@ const QuizAndAnswer = ({
             <p>{activeQuestion.answer}</p>
           ) : (
             <div className="py-4 text-center">
-              <p className="mb-2 italic text-zinc-300">
+              <p className="mb-2 italic dark:text-zinc-300 text-zinc-600">
                 No answer provided yet
               </p>
               {interview.status === "in-progress" && (

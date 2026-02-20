@@ -6,11 +6,11 @@ const InterviewDetails = ({ interview }: { interview: any }) => {
       <h2 className="mb-4 text-xl font-bold">Interview Details</h2>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div>
-          <p className="text-zinc-400">Job Role:</p>
+          <p className="dark:text-zinc-400 text-gray-600">Job Role:</p>
           <p className="text-sm font-medium uppercase">{interview.jobRole}</p>
         </div>
         <div>
-          <p className="text-zinc-400">Job Description:</p>
+          <p className="dark:text-zinc-400 text-gray-600">Job Description:</p>
           <p className="text-sm font-medium uppercase">
             {Array.isArray(interview.techStack)
               ? interview.techStack.join(" ")
@@ -18,14 +18,14 @@ const InterviewDetails = ({ interview }: { interview: any }) => {
           </p>
         </div>
         <div>
-          <p className="text-zinc-400">Experience:</p>
+          <p className="dark:text-zinc-400 text-gray-600">Experience:</p>
           <p className="text-sm font-medium uppercase">
             {interview.yearsOfExperience}{" "}
             {interview.yearsOfExperience <= 1 ? "Year" : "Years"}
           </p>
         </div>
         <div>
-          <p className="text-zinc-400">Date:</p>
+          <p className="dark:text-zinc-400 text-gray-600">Date:</p>
           <p className="text-sm font-medium uppercase">
             {new Date(
               interview.completedAt || interview.createdAt

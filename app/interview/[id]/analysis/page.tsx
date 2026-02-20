@@ -185,15 +185,15 @@ export default function AnalysisPage({ params }: AnalysisProps) {
 
   // logic for marks data
   const getScoreColor = (score: number) => {
-    if (score >= 80) return "text-green-500";
-    if (score >= 60) return "text-yellow-500";
-    return "text-red-500";
+    if (score >= 80) return "dark:text-green-500 text-green-700";
+    if (score >= 60) return "dark:text-yellow-500 text-yellow-700";
+    return "dark:text-red-500 text-red-700";
   };
 
   const getScoreBackground = (score: number) => {
-    if (score >= 80) return "bg-green-900/20";
-    if (score >= 60) return "bg-yellow-900/20";
-    return "bg-red-900/20";
+    if (score >= 80) return "dark:bg-green-900/20 bg-green-100/50";
+    if (score >= 60) return "dark:bg-yellow-900/20 bg-yellow-100/50";
+    return "dark:bg-red-900/20 bg-red-100/50";
   };
 
   const getScoreLabel = (score: number) => {
@@ -227,7 +227,7 @@ export default function AnalysisPage({ params }: AnalysisProps) {
   return (
     <>
       <InterviewNav interview={interview} />
-      <div className="text-white container mx-auto py-6 px-4 sm:px-6 max-w-7xl safe-area-inset">
+      <div className="dark:text-white text-gray-900 container mx-auto py-6 px-4 sm:px-6 max-w-7xl safe-area-inset">
         {/* heading and message */}
         <div className="flex max-sm:flex-col max-sm:gap-6 max-sm:text-center justify-between items-center mb-6">
           <div>
@@ -295,12 +295,12 @@ export default function AnalysisPage({ params }: AnalysisProps) {
                   scoreBackground={getScoreBackground}
                 />
               ) : (
-                <div className="bg-gray-800 rounded-lg shadow-md p-6 text-center">
-                  <p className="text-gray-500 mb-2">
+                <div className="dark:bg-gray-800 bg-gray-100 rounded-lg shadow-md p-6 text-center">
+                  <p className="dark:text-gray-500 text-gray-600 mb-2">
                     Analysis is being generated for this question.
                   </p>
                   {interview.status === "in-progress" && (
-                    <p className="text-sm text-gray-400">
+                    <p className="text-sm dark:text-gray-400 text-gray-500">
                       Complete the interview to see full analysis.
                     </p>
                   )}
@@ -308,7 +308,7 @@ export default function AnalysisPage({ params }: AnalysisProps) {
               )
             ) : (
               <div className="bg-[var(--input-bg)] rounded-lg shadow-md p-6 text-center">
-                <p className="text-gray-500 mb-2">
+                <p className="dark:text-gray-500 text-gray-600 mb-2">
                   Answer this question to see analysis.
                 </p>
                 {interview.status === "in-progress" && (
