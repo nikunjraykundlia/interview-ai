@@ -186,18 +186,5 @@ The platform integrates with three n8n agentic workflows for enhanced AI capabil
   "recommendedImprovedQuestions": "string",
   "actionableAdviceForInterviewerAgent": "string"
   }
+ 
   ```
-  
-## 🚀 Development Notes
-
-- Uses Next.js 16 with Turbopack for fast development
-- React 19 with Server Components and Client Components
-- TypeScript for type safety
-- MongoDB connection pooling via Mongoose
-- Environment-based configuration
-- Error handling with fallback mechanisms
-- Async processing for non-blocking operations
-- Modern UI with glassmorphism and gradient effects
-- Real-time updates with Server-Sent Events (SSE)
-- Interactive UI components with smooth animations
-- Advanced filtering and data visualization interface
